@@ -1,0 +1,14 @@
+levels:
+  Test:
+    region: test
+    bound1: 1, 1, 1
+    bound2: 3, 3, 3
+    start: 1, 1, 1
+    finish: 1, 2, 3
+    checkpoints:
+      test1: 3, 3, 3
+      test2: 2, 2, 2
+    records:
+      ya_soos: 123
+      randomDude: 333
+
