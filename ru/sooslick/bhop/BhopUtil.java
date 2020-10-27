@@ -5,10 +5,6 @@ import org.bukkit.World;
 
 public class BhopUtil {
 
-    public BhopUtil() throws Exception {
-        throw new Exception("xaxa exception"); //todo
-    }
-
     //todo - rm world from parameters
     public static Location stringToLocation(World w, String s) {
         String[] coords = s.split(",");

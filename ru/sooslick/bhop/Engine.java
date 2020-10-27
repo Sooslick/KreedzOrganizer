@@ -1,24 +1,25 @@
 package ru.sooslick.bhop;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class Engine extends JavaPlugin {
 
     public static final String CFG_FILENAME = "plugin.yml";
 
+    public static Logger LOG;
+
     private FileConfiguration cfg;
     private List<BhopLevel> levels;
-    private CommandListener commandListener;
-    private EventListener eventListener;
     private List<BhopPlayer> activePlayers;
     private int bhopTimerId = 0;
 
@@ -30,61 +31,79 @@ public class Engine extends JavaPlugin {
 
     @Override
     public void onEnable() {
-
+        LOG = Bukkit.getLogger();
         //check plugin directory. Create if not exists
-        try {
-            if (!getDataFolder().exists()) {
-                if (!getDataFolder().mkdir()) {
-                    throw new Exception("cannot create datafolder");
-                }
+        if (!getDataFolder().exists()) {
+            if (getDataFolder().mkdir()) {
+                saveDefaultConfig();
+            } else {
+                LOG.warning("Cannot create data folder. Default config will be loaded!");
             }
-
-            File f = new File(getDataFolder().toString() + File.separator + CFG_FILENAME);
-            if (!f.exists()) {
-                throw new Exception("cfg not exists");   //при перехвате эксепшна конфиг забивается дефолтными значениями
-            }
-
-            cfg = getConfig();              //todo по хорошему надо явно загрузить файл getDataFolder().toString() + File.separator + CFG_FILENAME
-
-        } catch (Exception e) {
-            System.out.println("get default data"); //todo
-
-            saveDefaultConfig();
-            cfg = getConfig();
-
         }
 
+        //load and read config
+        //todo: refactor to Cfg class
+        cfg = getConfig();
         ConfigurationSection csLevels = cfg.getConfigurationSection("levels");
-
-        World w = Bukkit.getWorlds().get(0);
         levels = new ArrayList<>();
         for (String levelName : csLevels.getKeys(false)) {
-            ConfigurationSection csParams = csLevels.getConfigurationSection(levelName);
-            BhopLevel bhopLevel = new BhopLevel(levelName);
-
-
-            bhopLevel.setBounds(BhopUtil.stringToLocation(w, csParams.getString("bound1")),
-                                BhopUtil.stringToLocation(w, csParams.getString("bound2")));  //todo: world(0) - world by name
-            bhopLevel.setStart(BhopUtil.stringToLocation(w, csParams.getString("start")));
-            bhopLevel.setFinish(BhopUtil.stringToLocation(w, csParams.getString("finish")));
-
-            ConfigurationSection csCheckpoints = csParams.getConfigurationSection("checkpoints");
-            for (String cpName : csCheckpoints.getKeys(false)) {
-                bhopLevel.addCheckpoint(new BhopCheckpoint(BhopUtil.stringToLocation(w, csCheckpoints.getString(cpName)), cpName));
+            if (getBhopLevel(levelName) != null) {
+                LOG.warning("Level " + levelName + " dublication in config.yml, skipping");
+                continue;
             }
-            //todo hi scores
-            levels.add(bhopLevel);
+            try {
+                //read level's data
+                ConfigurationSection csParams = csLevels.getConfigurationSection(levelName);
+                BhopLevel bhopLevel = new BhopLevel(levelName);
+                World w = Bukkit.getWorld(csParams.getString("world"));
+                bhopLevel.setBounds(
+                        BhopUtil.stringToLocation(w, csParams.getString("bound1")),
+                        BhopUtil.stringToLocation(w, csParams.getString("bound2")));
+                bhopLevel.setStart(BhopUtil.stringToLocation(w, csParams.getString("start")));
+                bhopLevel.setFinish(BhopUtil.stringToLocation(w, csParams.getString("finish")));
+                bhopLevel.setTriggerType(TriggerType.valueOf(csParams.getString("triggerType")));
 
+                //read level's checkpoints data
+                ConfigurationSection csCheckpoints = csParams.getConfigurationSection("checkpoints");
+                for (String cpName : csCheckpoints.getKeys(false)) {
+                    ConfigurationSection cpData = csCheckpoints.getConfigurationSection(cpName);
+                    Location load = BhopUtil.stringToLocation(w, cpData.getString("loadLocation"));
+                    Location trigger;
+                    TriggerType type;
+                    try {
+                        trigger = BhopUtil.stringToLocation(w, cpData.getString("triggerLocation"));
+                    } catch (Exception e) {
+                        trigger = load;
+                    }
+                    try {
+                        type = TriggerType.valueOf(cpData.getString("triggerType"));
+                    } catch (Exception e) {
+                        type = TriggerType.MOVEMENT;
+                    }
+                    bhopLevel.addCheckpoint(new BhopCheckpoint(cpName, load, trigger, type));
+                }
+
+                //read level's leaderboard
+                ConfigurationSection csRecords = csParams.getConfigurationSection("leaderboard");
+                for (String recHolder : csRecords.getKeys(false)) {
+                    bhopLevel.addRecord(new BhopRecord(recHolder, csRecords.getInt(recHolder)));
+                }
+
+                //save level
+                levels.add(bhopLevel);
+            } catch (Exception e) {
+                LOG.warning("Error occured while reading level " + levelName);
+                LOG.warning(e.getMessage());
+                e.printStackTrace();
+            }
         }
 
         //init listeners;
         getServer().getPluginManager().registerEvents(new EventListener(this), this);
-        commandListener = new CommandListener(this);
-        getCommand("bhop").setExecutor(commandListener);        //todo plugin.yml
+        getCommand("bhop").setExecutor(new CommandListener(this));        //todo plugin.yml
 
         //init other variables
         activePlayers = new ArrayList<>();
-
     }
 
     @Override
@@ -100,7 +119,7 @@ public class Engine extends JavaPlugin {
     }
 
     public BhopCheckpoint getBhopCheckpoint(Player p, String cpName) {
-        BhopLevel bhl = null;                       //todo refactor to method
+        BhopLevel bhl = null;                       //todo refactor to method getPlayerBhopLevel
         for (BhopPlayer bhpl : activePlayers) {
             if (bhpl.getPlayer().equals(p)) {
                 bhl = bhpl.getLevel();
@@ -126,7 +145,7 @@ public class Engine extends JavaPlugin {
 
     public void playerLoadEvent(Player p, BhopCheckpoint cp) {
         //TODO CHECK IF CHECKPOINT IS AVAILABLE 4 PLAYER
-        p.teleport(cp.getLocation());
+        p.teleport(cp.getLoadLocation());
         //todo message OH HELLO THERE
     }
 

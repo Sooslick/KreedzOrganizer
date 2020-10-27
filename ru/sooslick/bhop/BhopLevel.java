@@ -8,13 +8,14 @@ import java.util.List;
 public class BhopLevel {
 
     private final String name;
-    private List<BhopCheckpoint> checkpoints;
-    private List<BhopRecord> records;
+    private final List<BhopCheckpoint> checkpoints;
+    private final List<BhopRecord> records;
     //private ... region
     private Location bound1;
     private Location bound2;
     private Location start;
     private Location finish;
+    private TriggerType triggerType;
 
     //todo: worldguard region and other data
 
@@ -45,6 +46,10 @@ public class BhopLevel {
         return finish;
     }
 
+    public void setTriggerType(TriggerType type) {
+        this.triggerType = type;
+    }
+
     public String getName() {
         return name;
     }
@@ -66,4 +71,7 @@ public class BhopLevel {
         return null;
     }
 
+    public void addRecord(BhopRecord rec) {
+        records.add(rec);
+    }
 }

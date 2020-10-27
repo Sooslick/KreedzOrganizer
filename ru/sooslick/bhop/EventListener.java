@@ -28,6 +28,7 @@ public class EventListener implements Listener {
             return;
 
         Player p = e.getPlayer();
+        //todo check gamemode, allow only survival and adventure
         BhopPlayer bhpl = engine.getActivePlayer(p);
         if (bhpl == null)
             return;
@@ -42,7 +43,7 @@ public class EventListener implements Listener {
             return;
         }
         for (BhopCheckpoint bhcp : bhl.getCheckpoints()) {
-            if (clickedBlock.equals(w.getBlockAt(bhcp.getLocation()))) {
+            if (clickedBlock.equals(w.getBlockAt(bhcp.getLoadLocation()))) {
                 engine.playerCheckpointEvent(p, bhcp);
                 return;
             }
