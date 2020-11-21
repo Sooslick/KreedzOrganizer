@@ -45,6 +45,102 @@ public class Engine extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        reload();
+
+        //todo: should me refactor listeners to reload()?
+        //init listeners;
+        getServer().getPluginManager().registerEvents(new EventListener(this), this);
+        getCommand("bhop").setExecutor(new CommandListener(this));        //todo plugin.yml
+
+        //init other variables
+        activePlayers = new ArrayList<>();
+    }
+
+    @Override
+    public void onDisable() {
+        saveAll();
+    }
+
+    public BhopLevel getBhopLevel(String name) {
+        for (BhopLevel bhl : levels) {
+            if (bhl.getName().equals(name)) return bhl;
+        }
+        return null;
+    }
+
+    public BhopCheckpoint getBhopCheckpoint(Player p, String cpName) {
+        BhopLevel bhl = null;                       //todo refactor to method getPlayerBhopLevel
+        for (BhopPlayer bhpl : activePlayers) {
+            if (bhpl.getPlayer().equals(p)) {
+                bhl = bhpl.getLevel();
+                break;
+            }
+        }
+        if (bhl == null) {
+            //todo wtf?
+            return null;
+        }
+        return bhl.getCheckpoint(cpName);
+    }
+
+    public void playerStartEvent(Player p, BhopLevel bhl) {
+        activePlayers.add(new BhopPlayer(p, bhl));
+        p.teleport(bhl.getStartPosition());
+        //todo: store player's inventory to prevent cheating
+        //check 4 timer processor
+        if (bhopTimerId == 0) { //todo check can scheduler return 0 as ID
+            bhopTimerId = Bukkit.getScheduler().scheduleSyncRepeatingTask(this, bhopTimerProcessor, 1, 20);
+        }
+    }
+
+    public void playerLoadEvent(Player p, BhopCheckpoint cp) {
+        //TODO CHECK IF CHECKPOINT IS AVAILABLE 4 PLAYER
+        p.teleport(cp.getLoadLocation());
+        //todo message OH HELLO THERE
+    }
+
+    public void playerExitEvent(Player p) {
+        BhopPlayer bhpl = getActivePlayer(p);
+        if (bhpl == null) return;               //todo WTF.
+        activePlayers.remove(bhpl);
+
+        if (activePlayers.size() == 0) {
+            Bukkit.getScheduler().cancelTask(bhopTimerId);
+            bhopTimerId = 0;
+        }
+        //todo restore player's inventory
+    }
+
+    public void playerFinishEvent(Player p) {
+        BhopPlayer bhpl = getActivePlayer(p);
+        //todo: save player's time and send MESSAGE.
+        p.sendMessage("MOLODEC.");
+        playerExitEvent(p);
+    }
+
+    public void playerCheckpointEvent(Player p, BhopCheckpoint cp) {
+        getActivePlayer(p).addCheckpoint(cp);
+    }
+
+    public boolean checkPlayerActive(Player p) {
+        for (BhopPlayer bhpl : activePlayers) {
+            if (bhpl.getPlayer().equals(p)) return true;
+        }
+        return false;
+    }
+
+    public int getActivePlayersCount() {
+        return activePlayers.size();
+    }
+
+    public BhopPlayer getActivePlayer(Player p) {
+        for (BhopPlayer bhpl : activePlayers) {
+            if (bhpl.getPlayer().equals(p)) return bhpl;
+        }
+        return null;
+    }
+
+    private void reload() {
         LOG = Bukkit.getLogger();
 
         //check plugin directory. Create if not exists
@@ -148,48 +244,16 @@ public class Engine extends JavaPlugin {
                 e.printStackTrace();
             }
         }
-
-        //init listeners;
-        getServer().getPluginManager().registerEvents(new EventListener(this), this);
-        getCommand("bhop").setExecutor(new CommandListener(this));        //todo plugin.yml
-
-        //init other variables
-        activePlayers = new ArrayList<>();
     }
 
-    @Override
-    public void onDisable() {
+    private void saveAll() {
+        levels.forEach(this::saveLevel);
+        saveCfg();
+    }
+
+    private void saveCfg() {
         List<String> levelNames = new LinkedList<>();
-        levels.forEach(level -> {
-            try {
-                levelNames.add(level.getName());
-                YamlConfiguration levelCfg = new YamlConfiguration();
-                levelCfg.set("world", level.getStartPosition().getWorld().getName());
-//            levelCfg.set("region", level.getRegion());    //todo region
-                levelCfg.set("bound1", BhopUtil.locationToString(level.getBound1()));
-                levelCfg.set("bound2", BhopUtil.locationToString(level.getBound2()));
-                levelCfg.set("start", BhopUtil.locationToString(level.getStartPosition()));
-                levelCfg.set("finish", BhopUtil.locationToString(level.getFinish()));
-                levelCfg.set("triggerType", level.getTriggerType().toString());
-                ConfigurationSection csCps = new YamlConfiguration();
-                for (BhopCheckpoint cp : level.getCheckpoints()) {
-                    ConfigurationSection csCurrentCp = new YamlConfiguration();
-                    csCurrentCp.set("triggerType", cp.getTriggerType().toString());
-                    csCurrentCp.set("triggerLocation", BhopUtil.locationToString(cp.getTriggerLocation()));
-                    csCurrentCp.set("loadLocation", BhopUtil.locationToString(cp.getLoadLocation()));
-                    csCps.set(cp.getName(), csCurrentCp);
-                }
-                levelCfg.set("checkpoints", csCps);
-                ConfigurationSection csHs = new YamlConfiguration();
-                for (BhopRecord rec : level.getRecords()) {
-                    csHs.set(rec.getName(), rec.getTime());
-                }
-                levelCfg.set("leaderboard", csHs);
-                levelCfg.save(LEVELS_PATH + level.getName() + YAML_EXTENSION);
-            } catch (Exception e) {
-                LOG.warning("Unable to save level " + level.getName());
-            }
-        });
+        levels.forEach(level -> levelNames.add(level.getName()));
         try {
             FileConfiguration mainCfg = new YamlConfiguration();
             mainCfg.set(CFG_LEVELS, levelNames);
@@ -199,83 +263,34 @@ public class Engine extends JavaPlugin {
         }
     }
 
-    public BhopLevel getBhopLevel(String name) {
-        for (BhopLevel bhl : levels) {
-            if (bhl.getName().equals(name)) return bhl;
-        }
-        return null;
-    }
-
-    public BhopCheckpoint getBhopCheckpoint(Player p, String cpName) {
-        BhopLevel bhl = null;                       //todo refactor to method getPlayerBhopLevel
-        for (BhopPlayer bhpl : activePlayers) {
-            if (bhpl.getPlayer().equals(p)) {
-                bhl = bhpl.getLevel();
-                break;
+    private void saveLevel(BhopLevel level) {
+        try {
+            YamlConfiguration levelCfg = new YamlConfiguration();
+            levelCfg.set("world", level.getStartPosition().getWorld().getName());
+//            levelCfg.set("region", level.getRegion());    //todo region
+            levelCfg.set("bound1", BhopUtil.locationToString(level.getBound1()));
+            levelCfg.set("bound2", BhopUtil.locationToString(level.getBound2()));
+            levelCfg.set("start", BhopUtil.locationToString(level.getStartPosition()));
+            levelCfg.set("finish", BhopUtil.locationToString(level.getFinish()));
+            levelCfg.set("triggerType", level.getTriggerType().toString());
+            ConfigurationSection csCps = new YamlConfiguration();
+            for (BhopCheckpoint cp : level.getCheckpoints()) {
+                ConfigurationSection csCurrentCp = new YamlConfiguration();
+                csCurrentCp.set("triggerType", cp.getTriggerType().toString());
+                csCurrentCp.set("triggerLocation", BhopUtil.locationToString(cp.getTriggerLocation()));
+                csCurrentCp.set("loadLocation", BhopUtil.locationToString(cp.getLoadLocation()));
+                csCps.set(cp.getName(), csCurrentCp);
             }
+            levelCfg.set("checkpoints", csCps);
+            ConfigurationSection csHs = new YamlConfiguration();
+            for (BhopRecord rec : level.getRecords()) {
+                csHs.set(rec.getName(), rec.getTime());
+            }
+            levelCfg.set("leaderboard", csHs);
+            levelCfg.save(LEVELS_PATH + level.getName() + YAML_EXTENSION);
+        } catch (Exception e) {
+            LOG.warning("Unable to save level " + level.getName());
         }
-        if (bhl == null) {
-            //todo wtf?
-            return null;
-        }
-        return bhl.getCheckpoint(cpName);
-    }
-
-    public void playerStartEvent(Player p, BhopLevel bhl) {
-        activePlayers.add(new BhopPlayer(p, bhl));
-        p.teleport(bhl.getStartPosition());
-        //todo: store player's inventory to prevent cheating
-        //check 4 timer processor
-        if (bhopTimerId == 0) { //todo check can scheduler return 0 as ID
-            bhopTimerId = Bukkit.getScheduler().scheduleSyncRepeatingTask(this, bhopTimerProcessor, 1, 20);
-        }
-    }
-
-    public void playerLoadEvent(Player p, BhopCheckpoint cp) {
-        //TODO CHECK IF CHECKPOINT IS AVAILABLE 4 PLAYER
-        p.teleport(cp.getLoadLocation());
-        //todo message OH HELLO THERE
-    }
-
-    public void playerExitEvent(Player p) {
-        BhopPlayer bhpl = getActivePlayer(p);
-        if (bhpl == null) return;               //todo WTF.
-        activePlayers.remove(bhpl);
-
-        if (activePlayers.size() == 0) {
-            Bukkit.getScheduler().cancelTask(bhopTimerId);
-            bhopTimerId = 0;
-        }
-        //todo restore player's inventory
-    }
-
-    public void playerFinishEvent(Player p) {
-        BhopPlayer bhpl = getActivePlayer(p);
-        //todo: save player's time and send MESSAGE.
-        p.sendMessage("MOLODEC.");
-        playerExitEvent(p);
-    }
-
-    public void playerCheckpointEvent(Player p, BhopCheckpoint cp) {
-        getActivePlayer(p).addCheckpoint(cp);
-    }
-
-    public boolean checkPlayerActive(Player p) {
-        for (BhopPlayer bhpl : activePlayers) {
-            if (bhpl.getPlayer().equals(p)) return true;
-        }
-        return false;
-    }
-
-    public int getActivePlayersCount() {
-        return activePlayers.size();
-    }
-
-    public BhopPlayer getActivePlayer(Player p) {
-        for (BhopPlayer bhpl : activePlayers) {
-            if (bhpl.getPlayer().equals(p)) return bhpl;
-        }
-        return null;
     }
 
     //todo
