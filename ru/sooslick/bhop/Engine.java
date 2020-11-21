@@ -5,18 +5,32 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Logger;
 
 public class Engine extends JavaPlugin {
 
     public static final String CFG_FILENAME = "plugin.yml";
+    public static final String CFG_DEFAULT_LEVEL = "defaultLevel.yml";
+    public static final String CFG_LEVELS = "levels";
+    public static final String YAML_EXTENSION = ".yml";
 
     public static Logger LOG;
+
+    private final String DATA_FOLDER_PATH = getDataFolder().getPath() + File.separator;
+    private final String LEVELS_DIR = DATA_FOLDER_PATH + CFG_LEVELS;
+    private final String LEVELS_PATH = LEVELS_DIR + File.separator;
 
     private FileConfiguration cfg;
     private List<BhopLevel> levels;
@@ -32,28 +46,65 @@ public class Engine extends JavaPlugin {
     @Override
     public void onEnable() {
         LOG = Bukkit.getLogger();
+
         //check plugin directory. Create if not exists
+        boolean folderCreated = false;
         if (!getDataFolder().exists()) {
             if (getDataFolder().mkdir()) {
-                saveDefaultConfig();
+                folderCreated = true;
+                LOG.info("Created plugin folder");
             } else {
-                LOG.warning("Cannot create data folder. Default config will be loaded!");
+                LOG.warning("Cannot create plugin folder. Default config will be loaded!");
+            }
+        }
+        saveDefaultConfig();
+
+        //check levels directory, create and fill if not exists
+        if (folderCreated) {
+            File levelsDir = new File(LEVELS_DIR);
+            if (!levelsDir.exists()) {
+                if (levelsDir.mkdir()) {
+                    //save defaultLevel.yml from resources
+                    try {
+                        File out = new File(LEVELS_PATH + CFG_DEFAULT_LEVEL);
+                        if (!out.exists()) {
+                            if (!out.createNewFile()) {
+                                throw new IOException();
+                            }
+                        }
+                        BufferedReader br = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream(CFG_DEFAULT_LEVEL)));
+                        PrintWriter pw = new PrintWriter(new File(LEVELS_PATH + CFG_DEFAULT_LEVEL));
+                        String s;
+                        while (!(s = br.readLine()).isEmpty()) {
+                            pw.println(s);
+                        }
+                        pw.flush();
+                        pw.close();
+                        LOG.info("Saved defaultLevel.yml!");
+                    } catch (IOException e) {
+                        LOG.warning("Cannot create defaultLevel.yml!");
+                    }
+                } else {
+                    LOG.warning("Cannot create levels folder!");
+                }
             }
         }
 
         //load and read config
         //todo: refactor to Cfg class
         cfg = getConfig();
-        ConfigurationSection csLevels = cfg.getConfigurationSection("levels");
+        List<?> csLevels = cfg.getList("levels");
         levels = new ArrayList<>();
-        for (String levelName : csLevels.getKeys(false)) {
+        for (Object obj : csLevels) {
+            String levelName = (String) obj;
             if (getBhopLevel(levelName) != null) {
                 LOG.warning("Level " + levelName + " dublication in config.yml, skipping");
                 continue;
             }
             try {
                 //read level's data
-                ConfigurationSection csParams = csLevels.getConfigurationSection(levelName);
+                YamlConfiguration csParams = new YamlConfiguration();
+                csParams.load(LEVELS_PATH + levelName + YAML_EXTENSION);
                 BhopLevel bhopLevel = new BhopLevel(levelName);
                 World w = Bukkit.getWorld(csParams.getString("world"));
                 bhopLevel.setBounds(
@@ -108,7 +159,44 @@ public class Engine extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        //todo save config + leaderboards
+        List<String> levelNames = new LinkedList<>();
+        levels.forEach(level -> {
+            try {
+                levelNames.add(level.getName());
+                YamlConfiguration levelCfg = new YamlConfiguration();
+                levelCfg.set("world", level.getStartPosition().getWorld().getName());
+//            levelCfg.set("region", level.getRegion());    //todo region
+                levelCfg.set("bound1", BhopUtil.locationToString(level.getBound1()));
+                levelCfg.set("bound2", BhopUtil.locationToString(level.getBound2()));
+                levelCfg.set("start", BhopUtil.locationToString(level.getStartPosition()));
+                levelCfg.set("finish", BhopUtil.locationToString(level.getFinish()));
+                levelCfg.set("triggerType", level.getTriggerType().toString());
+                ConfigurationSection csCps = new YamlConfiguration();
+                for (BhopCheckpoint cp : level.getCheckpoints()) {
+                    ConfigurationSection csCurrentCp = new YamlConfiguration();
+                    csCurrentCp.set("triggerType", cp.getTriggerType().toString());
+                    csCurrentCp.set("triggerLocation", BhopUtil.locationToString(cp.getTriggerLocation()));
+                    csCurrentCp.set("loadLocation", BhopUtil.locationToString(cp.getLoadLocation()));
+                    csCps.set(cp.getName(), csCurrentCp);
+                }
+                levelCfg.set("checkpoints", csCps);
+                ConfigurationSection csHs = new YamlConfiguration();
+                for (BhopRecord rec : level.getRecords()) {
+                    csHs.set(rec.getName(), rec.getTime());
+                }
+                levelCfg.set("leaderboard", csHs);
+                levelCfg.save(LEVELS_PATH + level.getName() + YAML_EXTENSION);
+            } catch (Exception e) {
+                LOG.warning("Unable to save level " + level.getName());
+            }
+        });
+        try {
+            FileConfiguration mainCfg = new YamlConfiguration();
+            mainCfg.set(CFG_LEVELS, levelNames);
+            mainCfg.save(DATA_FOLDER_PATH + CFG_FILENAME);
+        } catch (Exception e) {
+            LOG.warning("Unable to save config");
+        }
     }
 
     public BhopLevel getBhopLevel(String name) {

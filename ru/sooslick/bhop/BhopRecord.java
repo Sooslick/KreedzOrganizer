@@ -10,6 +10,11 @@ public class BhopRecord {
         playerTime = time;
     }
 
-    //todo
+    public String getName() {
+        return playerName;
+    }
 
+    public int getTime() {
+        return playerTime;
+    }
 }

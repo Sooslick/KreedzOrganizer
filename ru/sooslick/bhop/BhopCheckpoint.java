@@ -20,6 +20,14 @@ public class BhopCheckpoint {
         return loadLocation;
     }
 
+    public Location getTriggerLocation() {
+        return triggerLocation;
+    }
+
+    public TriggerType getTriggerType() {
+        return triggerType;
+    }
+
     public String getName() {
         return name;
     }

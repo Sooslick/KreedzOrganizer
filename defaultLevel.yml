@@ -1,0 +1,17 @@
+world: world
+region: test
+bound1: 2, 2, 2
+bound2: 10, 10, 10
+start: 2, 2, 2
+finish: 10, 10, 10
+triggerType: movement
+checkpoints:
+  test1:
+    triggerType: interact
+    triggerLocation: 3, 3, 3
+    loadLocation: 3, 3, 3
+  test2:
+    loadLocation: 5, 5, 5
+leaderboard:
+  ya_soos: 123
+  randomDude: 333
