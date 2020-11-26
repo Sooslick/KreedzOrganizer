@@ -29,22 +29,23 @@ public class EventListener implements Listener {
 
         Player p = e.getPlayer();
         //todo check gamemode, allow only survival and adventure
-        BhopPlayer bhpl = engine.getActivePlayer(p);
+        BhopPlayer bhpl = engine.getBhopPlayer(p);
         if (bhpl == null)
             return;
 
         if (!(e.getAction().equals(Action.RIGHT_CLICK_BLOCK)))
             return;
 
+        //todo rework method, impl triggers
         BhopLevel bhl = bhpl.getLevel();
         Block clickedBlock = e.getClickedBlock();
         if (clickedBlock.equals(w.getBlockAt(bhl.getFinish()))) {
-            engine.playerFinishEvent(p);
+            engine.playerFinishEvent(bhpl);
             return;
         }
         for (BhopCheckpoint bhcp : bhl.getCheckpoints()) {
             if (clickedBlock.equals(w.getBlockAt(bhcp.getLoadLocation()))) {
-                engine.playerCheckpointEvent(p, bhcp);
+                engine.playerCheckpointEvent(bhpl, bhcp);
                 return;
             }
         }
@@ -62,7 +63,7 @@ public class EventListener implements Listener {
             return;
 
         Player p = (Player) (e.getEntity());
-        BhopPlayer bhpl = engine.getActivePlayer(p);
+        BhopPlayer bhpl = engine.getBhopPlayer(p);
         if (bhpl == null)
             return;
 
@@ -74,11 +75,13 @@ public class EventListener implements Listener {
             return;
 
         Player p = e.getPlayer();
-        BhopPlayer bhpl = engine.getActivePlayer(p);
+        BhopPlayer bhpl = engine.getBhopPlayer(p);
         if (bhpl == null)
             return;
 
-        engine.playerExitEvent(p);
+        engine.playerExitEvent(bhpl);
     }
+
+    //todo onJoin: restore inv from file (failover check)
 
 }

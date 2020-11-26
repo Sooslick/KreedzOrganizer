@@ -24,13 +24,15 @@ public class Engine extends JavaPlugin {
     public static final String CFG_FILENAME = "plugin.yml";
     public static final String CFG_DEFAULT_LEVEL = "defaultLevel.yml";
     public static final String CFG_LEVELS = "levels";
+    public static final String CFG_INVENTORY = "inventory";
     public static final String YAML_EXTENSION = ".yml";
 
     public static Logger LOG;
 
-    private final String DATA_FOLDER_PATH = getDataFolder().getPath() + File.separator;
-    private final String LEVELS_DIR = DATA_FOLDER_PATH + CFG_LEVELS;
-    private final String LEVELS_PATH = LEVELS_DIR + File.separator;
+    private static String DATA_FOLDER_PATH;
+    private static String LEVELS_DIR;
+    private static String LEVELS_PATH;
+    public static String INVENTORY_PATH;
 
     private FileConfiguration cfg;
     private List<BhopLevel> levels;
@@ -45,6 +47,10 @@ public class Engine extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        DATA_FOLDER_PATH = getDataFolder().getPath() + File.separator;
+        LEVELS_DIR = DATA_FOLDER_PATH + CFG_LEVELS;
+        LEVELS_PATH = LEVELS_DIR + File.separator;
+        INVENTORY_PATH = DATA_FOLDER_PATH + CFG_INVENTORY + File.separator;
         reload();
 
         //todo: should me refactor listeners to reload()?
@@ -68,76 +74,80 @@ public class Engine extends JavaPlugin {
         return null;
     }
 
-    public BhopCheckpoint getBhopCheckpoint(Player p, String cpName) {
-        BhopLevel bhl = null;                       //todo refactor to method getPlayerBhopLevel
-        for (BhopPlayer bhpl : activePlayers) {
-            if (bhpl.getPlayer().equals(p)) {
-                bhl = bhpl.getLevel();
-                break;
-            }
-        }
+    public BhopCheckpoint getBhopCheckpoint(BhopPlayer bhpl, String cpName) {
+        if (bhpl == null)
+            return null;
+        BhopLevel bhl = bhpl.getLevel();
         if (bhl == null) {
-            //todo wtf?
+            //todo wtf? log message!
             return null;
         }
         return bhl.getCheckpoint(cpName);
     }
 
     public void playerStartEvent(Player p, BhopLevel bhl) {
+        //check if player triggered event while playing
+        BhopPlayer activeBhpl = getBhopPlayer(p);
+        if (activeBhpl != null)
+            activePlayers.remove(activeBhpl);
+
+        //create new BhopPlayer and prepare him
         activePlayers.add(new BhopPlayer(p, bhl));
+        //todo check result and cancel start if fail
+        InventoryUtil.invToFile(p);
         p.teleport(bhl.getStartPosition());
-        //todo: store player's inventory to prevent cheating
-        //check 4 timer processor
+
+        //launch timer if not exists
         if (bhopTimerId == 0) { //todo check can scheduler return 0 as ID
             bhopTimerId = Bukkit.getScheduler().scheduleSyncRepeatingTask(this, bhopTimerProcessor, 1, 20);
         }
     }
 
-    public void playerLoadEvent(Player p, BhopCheckpoint cp) {
+    public void playerLoadEvent(BhopPlayer bhpl, BhopCheckpoint cp) {
+        if (bhpl == null)
+            return;
         //TODO CHECK IF CHECKPOINT IS AVAILABLE 4 PLAYER
-        p.teleport(cp.getLoadLocation());
+        bhpl.getPlayer().teleport(cp.getLoadLocation());
         //todo message OH HELLO THERE
     }
 
-    public void playerExitEvent(Player p) {
-        BhopPlayer bhpl = getActivePlayer(p);
-        if (bhpl == null) return;               //todo WTF.
+    public void playerExitEvent(BhopPlayer bhpl) {
+        if (bhpl == null)
+            return;
         activePlayers.remove(bhpl);
 
         if (activePlayers.size() == 0) {
             Bukkit.getScheduler().cancelTask(bhopTimerId);
             bhopTimerId = 0;
         }
-        //todo restore player's inventory
+
+        //todo check result and ALARM if fail
+        InventoryUtil.invFromFile(bhpl.getPlayer());
     }
 
-    public void playerFinishEvent(Player p) {
-        BhopPlayer bhpl = getActivePlayer(p);
+    public void playerFinishEvent(BhopPlayer bhpl) {
+        if (bhpl == null)
+            return;
         //todo: save player's time and send MESSAGE.
-        p.sendMessage("MOLODEC.");
-        playerExitEvent(p);
+        bhpl.getPlayer().sendMessage("MOLODEC.");
+        playerExitEvent(bhpl);
     }
 
-    public void playerCheckpointEvent(Player p, BhopCheckpoint cp) {
-        getActivePlayer(p).addCheckpoint(cp);
+    public void playerCheckpointEvent(BhopPlayer bhpl, BhopCheckpoint cp) {
+        if (bhpl == null)
+            return;
+        bhpl.addCheckpoint(cp);
     }
 
-    public boolean checkPlayerActive(Player p) {
-        for (BhopPlayer bhpl : activePlayers) {
-            if (bhpl.getPlayer().equals(p)) return true;
-        }
-        return false;
-    }
-
-    public int getActivePlayersCount() {
-        return activePlayers.size();
-    }
-
-    public BhopPlayer getActivePlayer(Player p) {
+    public BhopPlayer getBhopPlayer(Player p) {
         for (BhopPlayer bhpl : activePlayers) {
             if (bhpl.getPlayer().equals(p)) return bhpl;
         }
         return null;
+    }
+
+    public int getActivePlayersCount() {
+        return activePlayers.size();
     }
 
     private void reload() {

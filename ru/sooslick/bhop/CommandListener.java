@@ -26,16 +26,15 @@ public class CommandListener implements CommandExecutor {
                 //console can't play bhop
                 if (!(sender instanceof Player))
                     return sendInfoMessage(sender, "xaxa console cannot bhop )))"); //todo
+                Player player = (Player) sender;
                 //check level
                 if (args.length == 1)
-                    return sendInfoMessage(sender, "infomessage"); //todo
+                    return sendInfoMessage(sender, "infomessage - level required"); //todo
                 BhopLevel bhl = engine.getBhopLevel(args[1]);
                 if (bhl == null)
                     return sendInfoMessage(sender, "infomessage"); //todo
-                //check player
-                if (engine.checkPlayerActive((Player) sender))
-                    sendInfoMessage(sender, "гаф тяф"); //todo
-                engine.playerStartEvent((Player) sender, bhl);
+                //trigger start event
+                engine.playerStartEvent(player, bhl);
                 return true;
             case COMMAND_LOAD:
                 //console can't play bhop
@@ -44,19 +43,23 @@ public class CommandListener implements CommandExecutor {
                 //check checkpoint
                 if (args.length == 1)
                     return sendInfoMessage(sender, "infomessage"); //todo
-                BhopCheckpoint bhcp = engine.getBhopCheckpoint((Player) sender, args[1]);
+                BhopPlayer bhpl = engine.getBhopPlayer((Player) sender);
+                if (bhpl == null)
+                    return sendInfoMessage(sender, "infomessage"); //todo
+                BhopCheckpoint bhcp = engine.getBhopCheckpoint(bhpl, args[1]);
                 if (bhcp == null)
                     return sendInfoMessage(sender, "infomessage"); //todo
-                engine.playerLoadEvent((Player) sender, bhcp);
+                engine.playerLoadEvent(bhpl, bhcp);
                 break;
             case COMMAND_EXIT:
                 //console can't play bhop
                 if (!(sender instanceof Player))
                     return sendInfoMessage(sender, "xaxa console cannot bhop )))"); //todo
                 //check player
-                if (!engine.checkPlayerActive((Player) sender))
+                bhpl = engine.getBhopPlayer((Player) sender);
+                if (bhpl == null)
                     sendInfoMessage(sender, "гаф тяф"); //todo
-                engine.playerExitEvent((Player) sender);
+                engine.playerExitEvent(bhpl);
                 break;
             default:
                 return sendInfoMessage(sender, "infomessage"); //todo
@@ -64,6 +67,7 @@ public class CommandListener implements CommandExecutor {
         return false;
     }
 
+    //todo weird method. Make void
     private boolean sendInfoMessage(CommandSender sender, String message) {
         sender.sendMessage(message);
         return true;
