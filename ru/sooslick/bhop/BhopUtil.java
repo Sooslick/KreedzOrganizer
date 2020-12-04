@@ -19,4 +19,24 @@ public class BhopUtil {
         return l.getBlockX() + COMMA + l.getBlockY() + COMMA + l.getBlockZ();
     }
 
+    public static boolean isInside(Location l, Location bound1, Location bound2) {
+        double x1 = bound1.getX();
+        double x2 = bound2.getX();
+        double y1 = bound1.getY();
+        double y2 = bound2.getY();
+        double z1 = bound1.getZ();
+        double z2 = bound2.getZ();
+        if (x2 < x1) swap(x1, x2);
+        if (y2 < y1) swap(y1, y2);
+        if (z2 < z1) swap(z1, z2);
+        return (l.getX() >= x1 && l.getX() <= x2 &&
+                l.getY() >= y1 && l.getY() <= y2 &&
+                l.getZ() >= z1 && l.getZ() <= z2);
+    }
+
+    public static void swap(Object a, Object b) {
+        Object temp = a;
+        a = b;
+        b = temp;
+    }
 }

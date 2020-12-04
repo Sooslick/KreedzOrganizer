@@ -28,6 +28,7 @@ public class Engine extends JavaPlugin {
     public static final String YAML_EXTENSION = ".yml";
 
     public static Logger LOG;
+    private static Engine instance;
 
     private static String DATA_FOLDER_PATH;
     private static String LEVELS_DIR;
@@ -41,12 +42,17 @@ public class Engine extends JavaPlugin {
 
     private Runnable bhopTimerProcessor = () -> {
         for (BhopPlayer bhpl : activePlayers) {
-            bhpl.timer++;
+            bhpl.tick();
         }
     };
 
+    public static Engine getInstance() {
+        return instance;
+    }
+
     @Override
     public void onEnable() {
+        instance = this;
         DATA_FOLDER_PATH = getDataFolder().getPath() + File.separator;
         LEVELS_DIR = DATA_FOLDER_PATH + CFG_LEVELS;
         LEVELS_PATH = LEVELS_DIR + File.separator;
@@ -106,7 +112,8 @@ public class Engine extends JavaPlugin {
     public void playerLoadEvent(BhopPlayer bhpl, BhopCheckpoint cp) {
         if (bhpl == null)
             return;
-        //TODO CHECK IF CHECKPOINT IS AVAILABLE 4 PLAYER
+        if (!bhpl.getCheckpoints().contains(cp))
+            return;
         bhpl.getPlayer().teleport(cp.getLoadLocation());
         //todo message OH HELLO THERE
     }
@@ -134,7 +141,7 @@ public class Engine extends JavaPlugin {
     }
 
     public void playerCheckpointEvent(BhopPlayer bhpl, BhopCheckpoint cp) {
-        if (bhpl == null)
+        if (bhpl == null || cp == null)
             return;
         bhpl.addCheckpoint(cp);
     }
