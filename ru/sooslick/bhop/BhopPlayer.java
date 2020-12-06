@@ -21,7 +21,7 @@ public class BhopPlayer {
         timer = 0;
         fleeTimer = 0;
         checkpoints = new ArrayList<>();
-        comeback = player.getLocation();    //todo: impl comeback teleports
+        comeback = player.getLocation();
     }
 
     public Player getPlayer() {
@@ -36,6 +36,10 @@ public class BhopPlayer {
 
     public void addCheckpoint(BhopCheckpoint cp) {
         checkpoints.add(cp);
+    }
+
+    public Location getComebackLocation() {
+        return comeback;
     }
 
     public void tick() {

@@ -85,7 +85,7 @@ public class Engine extends JavaPlugin {
             return null;
         BhopLevel bhl = bhpl.getLevel();
         if (bhl == null) {
-            //todo wtf? log message!
+            LOG.warning("Detected BhopPlayer without Level, player - " + bhpl.getPlayer().getName());
             return null;
         }
         return bhl.getCheckpoint(cpName);
@@ -114,8 +114,9 @@ public class Engine extends JavaPlugin {
             return;
         if (!bhpl.getCheckpoints().contains(cp))
             return;
-        bhpl.getPlayer().teleport(cp.getLoadLocation());
-        //todo message OH HELLO THERE
+        Player p = bhpl.getPlayer();
+        p.teleport(cp.getLoadLocation());
+        p.sendMessage("Loaded checkpoint " + cp.getName());
     }
 
     public void playerExitEvent(BhopPlayer bhpl) {
@@ -129,7 +130,9 @@ public class Engine extends JavaPlugin {
         }
 
         //todo check result and ALARM if fail
-        InventoryUtil.invFromFile(bhpl.getPlayer());
+        Player p = bhpl.getPlayer();
+        InventoryUtil.invFromFile(p);
+        p.teleport(bhpl.getComebackLocation());
     }
 
     public void playerFinishEvent(BhopPlayer bhpl) {
@@ -311,12 +314,9 @@ public class Engine extends JavaPlugin {
     }
 
     //todo
-    //  on move - detect triggers
     //  save records
 
     //todo:
     //  create arenas from game
     //  regions / boundings
-    //  more player events
-
 }

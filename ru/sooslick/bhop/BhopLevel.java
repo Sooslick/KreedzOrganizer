@@ -1,6 +1,7 @@
 package ru.sooslick.bhop;
 
 import org.bukkit.Location;
+import org.bukkit.World;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +40,10 @@ public class BhopLevel {
 
     public Location getBound2() {
         return bound2;
+    }
+
+    public World getWorld() {
+        return bound1.getWorld();
     }
 
     public void setStart(Location start) {

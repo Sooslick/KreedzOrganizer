@@ -16,9 +16,6 @@ public class EventListener implements Listener {
 
     private Engine engine;
 
-    //todo: world
-    private World w = Bukkit.getWorlds().get(0);
-
     public EventListener(Engine e) {
         engine = e;
     }
@@ -44,11 +41,10 @@ public class EventListener implements Listener {
         if (!(e.getEntity() instanceof Player))
             return;
 
-        if (!(e.getCause().equals(EntityDamageEvent.DamageCause.FALL)))
+        if (e.getCause() != EntityDamageEvent.DamageCause.FALL)
             return;
 
-        Player p = (Player) (e.getEntity());
-        BhopPlayer bhpl = engine.getBhopPlayer(p);
+        BhopPlayer bhpl = engine.getBhopPlayer((Player) e.getEntity());
         if (bhpl == null)
             return;
 
@@ -59,11 +55,11 @@ public class EventListener implements Listener {
         if (engine.getActivePlayersCount() == 0)
             return;
 
-        Player p = e.getPlayer();
-        BhopPlayer bhpl = engine.getBhopPlayer(p);
+        BhopPlayer bhpl = engine.getBhopPlayer(e.getPlayer());
         if (bhpl == null)
             return;
 
+        //todo: implement dc timeout and rejoins
         engine.playerExitEvent(bhpl);
     }
 
@@ -78,13 +74,13 @@ public class EventListener implements Listener {
 
         //check finish
         BhopLevel bhl = bhpl.getLevel();
-        if (bhl.getTriggerType() == type && b.equals(w.getBlockAt(bhl.getFinish()))) {
+        if (bhl.getTriggerType() == type && b.equals(bhl.getWorld().getBlockAt(bhl.getFinish()))) {
             engine.playerFinishEvent(bhpl);
             return;
         }
         //check cpoint
         for (BhopCheckpoint bhcp : bhl.getCheckpoints()) {
-            if (bhcp.getTriggerType() == type && b.equals(w.getBlockAt(bhcp.getLoadLocation()))) {
+            if (bhcp.getTriggerType() == type && b.equals(bhl.getWorld().getBlockAt(bhcp.getLoadLocation()))) {
                 engine.playerCheckpointEvent(bhpl, bhcp);
                 return;
             }

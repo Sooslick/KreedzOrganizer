@@ -7,12 +7,18 @@ public class BhopUtil {
 
     private static final String COMMA = ",";
 
-    //todo - rm world from parameters
-    public static Location stringToLocation(World w, String s) {
+    public static Location stringToLocation(String s) {
         String[] coords = s.split(COMMA);
-        return new Location(w, Double.parseDouble(coords[0]),
-                               Double.parseDouble(coords[1]),
-                               Double.parseDouble(coords[2]));
+        return new Location(null,
+                Double.parseDouble(coords[0]),
+                Double.parseDouble(coords[1]),
+                Double.parseDouble(coords[2]));
+    }
+
+    public static Location stringToLocation(World w, String s) {
+        Location l = stringToLocation(s);
+        l.setWorld(w);
+        return l;
     }
 
     public static String locationToString(Location l) {
@@ -34,6 +40,7 @@ public class BhopUtil {
                 l.getZ() >= z1 && l.getZ() <= z2);
     }
 
+    //todo: test method
     public static void swap(Object a, Object b) {
         Object temp = a;
         a = b;

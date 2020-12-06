@@ -18,7 +18,6 @@ public class CommandListener implements CommandExecutor {
     }
 
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        //todo check another commands and permissions
         if (args.length == 0)
             return sendInfoMessage(sender, "infomessage"); //todo
         switch (args[0]) {
