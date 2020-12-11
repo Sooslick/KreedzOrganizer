@@ -38,6 +38,7 @@ public class Engine extends JavaPlugin {
     private FileConfiguration cfg;
     private List<BhopLevel> levels;
     private List<BhopPlayer> activePlayers;
+    private List<BhopPlayer> dcPlayers;
     private int bhopTimerId = 0;
 
     private Runnable bhopTimerProcessor = () -> {
@@ -65,7 +66,9 @@ public class Engine extends JavaPlugin {
         getCommand("bhop").setExecutor(new CommandListener(this));        //todo plugin.yml
 
         //init other variables
+        //todo: reload don't reload this lists
         activePlayers = new ArrayList<>();
+        dcPlayers = new ArrayList<>();
     }
 
     @Override
@@ -92,6 +95,8 @@ public class Engine extends JavaPlugin {
     }
 
     public void playerStartEvent(Player p, BhopLevel bhl) {
+        //remove player from DC list if presents
+        dcPlayers.remove(getDcPlayer(p));
         //check if player triggered event while playing
         BhopPlayer activeBhpl = getBhopPlayer(p);
         if (activeBhpl != null)
@@ -119,10 +124,36 @@ public class Engine extends JavaPlugin {
         p.sendMessage("Loaded checkpoint " + cp.getName());
     }
 
+    public void playerRejoinEvent(BhopPlayer bhpl) {
+        if (bhpl == null)
+            return;
+        if (!dcPlayers.contains(bhpl))
+            return;
+        dcPlayers.remove(bhpl);
+        // a lot of code duplications, todo ref
+        activePlayers.add(bhpl);
+        //todo check result and cancel start if fail
+        InventoryUtil.invToFile(bhpl.getPlayer());
+        bhpl.getPlayer().teleport(bhpl.getDcLocation());
+        //launch timer if not exists
+        if (bhopTimerId == 0) { //todo check can scheduler return 0 as ID
+            bhopTimerId = Bukkit.getScheduler().scheduleSyncRepeatingTask(this, bhopTimerProcessor, 1, 20);
+        }
+    }
+
     public void playerExitEvent(BhopPlayer bhpl) {
+        playerExitEvent(bhpl, false);
+    }
+
+    public void playerExitEvent(BhopPlayer bhpl, boolean dc) {
         if (bhpl == null)
             return;
         activePlayers.remove(bhpl);
+
+        if (dc) {
+            bhpl.setDcLocation(bhpl.getPlayer().getLocation());
+            dcPlayers.add(bhpl);
+        }
 
         if (activePlayers.size() == 0) {
             Bukkit.getScheduler().cancelTask(bhopTimerId);
@@ -152,6 +183,16 @@ public class Engine extends JavaPlugin {
     public BhopPlayer getBhopPlayer(Player p) {
         for (BhopPlayer bhpl : activePlayers) {
             if (bhpl.getPlayer().equals(p)) return bhpl;
+        }
+        return null;
+    }
+
+    public BhopPlayer getDcPlayer(Player p) {
+        for (BhopPlayer dc : dcPlayers) {
+            // Player objects may be not equals, check by names
+            if (dc.getPlayer().getName().equals(p.getName())) {
+                return dc;
+            }
         }
         return null;
     }
@@ -269,6 +310,7 @@ public class Engine extends JavaPlugin {
     private void saveAll() {
         levels.forEach(this::saveLevel);
         saveCfg();
+        //todo: restore players
     }
 
     private void saveCfg() {

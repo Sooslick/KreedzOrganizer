@@ -13,6 +13,7 @@ public class BhopPlayer {
     private int timer;
     private List<BhopCheckpoint> checkpoints;
     private Location comeback;
+    private Location dcLocation;
     private int fleeTimer;
 
     public BhopPlayer(Player p, BhopLevel bl) {
@@ -22,10 +23,15 @@ public class BhopPlayer {
         fleeTimer = 0;
         checkpoints = new ArrayList<>();
         comeback = player.getLocation();
+        dcLocation = level.getStartPosition();
     }
 
     public Player getPlayer() {
         return player;
+    }
+
+    public void setPlayer(Player p) {
+        player = p;
     }
 
     public BhopLevel getLevel() { return level; }
@@ -40,6 +46,14 @@ public class BhopPlayer {
 
     public Location getComebackLocation() {
         return comeback;
+    }
+
+    public Location getDcLocation() {
+        return dcLocation;
+    }
+
+    public void setDcLocation(Location l) {
+        dcLocation = l;
     }
 
     public void tick() {

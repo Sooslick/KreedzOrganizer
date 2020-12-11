@@ -9,6 +9,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
@@ -59,8 +60,17 @@ public class EventListener implements Listener {
         if (bhpl == null)
             return;
 
-        //todo: implement dc timeout and rejoins
-        engine.playerExitEvent(bhpl);
+        engine.playerExitEvent(bhpl, true);
+    }
+
+    public void onJoin(PlayerJoinEvent e) {
+        Player p = e.getPlayer();
+        BhopPlayer bhpl = engine.getDcPlayer(p);
+        if (bhpl == null)
+            return;
+
+        bhpl.setPlayer(p);
+        p.sendMessage("слыш прыгать /bhop continue"); //todo msg
     }
 
     private void checkTrigger(Player p, Block b, TriggerType type) {

@@ -9,9 +9,10 @@ public class CommandListener implements CommandExecutor {
 
     private final Engine engine;
 
-    private final String COMMAND_START = "start";
-    private final String COMMAND_LOAD = "load";
-    private final String COMMAND_EXIT = "exit";
+    private static final String COMMAND_START = "start";
+    private static final String COMMAND_LOAD = "load";
+    private static final String COMMAND_EXIT = "exit";
+    private static final String COMMAND_CONTINUE = "continue";
 
     public CommandListener(Engine engine) {
         this.engine = engine;
@@ -20,7 +21,7 @@ public class CommandListener implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length == 0)
             return sendInfoMessage(sender, "infomessage"); //todo
-        switch (args[0]) {
+        switch (args[0].toLowerCase()) {
             case COMMAND_START:
                 //console can't play bhop
                 if (!(sender instanceof Player))
@@ -57,9 +58,19 @@ public class CommandListener implements CommandExecutor {
                 //check player
                 bhpl = engine.getBhopPlayer((Player) sender);
                 if (bhpl == null)
-                    sendInfoMessage(sender, "гаф тяф"); //todo
+                    return sendInfoMessage(sender, "гаф тяф"); //todo
                 engine.playerExitEvent(bhpl);
                 break;
+            case COMMAND_CONTINUE:
+                //console can't play bhop
+                if (!(sender instanceof Player))
+                    return sendInfoMessage(sender, "xaxa console cannot bhop )))"); //todo
+                //get bhop player from dc
+                bhpl = engine.getDcPlayer((Player) sender);
+                if (bhpl == null)
+                    return sendInfoMessage(sender, "гаф тяф"); //todo
+                //then trigger rejoin event
+                engine.playerRejoinEvent(bhpl);
             default:
                 return sendInfoMessage(sender, "infomessage"); //todo
         }
