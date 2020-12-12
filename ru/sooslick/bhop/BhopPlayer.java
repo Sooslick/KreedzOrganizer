@@ -15,6 +15,7 @@ public class BhopPlayer {
     private Location comeback;
     private Location dcLocation;
     private int fleeTimer;
+    private boolean cheats;
 
     public BhopPlayer(Player p, BhopLevel bl) {
         player = p;
@@ -24,6 +25,7 @@ public class BhopPlayer {
         checkpoints = new ArrayList<>();
         comeback = player.getLocation();
         dcLocation = level.getStartPosition();
+        cheats = false;
     }
 
     public Player getPlayer() {
@@ -64,6 +66,15 @@ public class BhopPlayer {
 
     public int getTimer() {
         return timer;
+    }
+
+    public void enableCheats() {
+        cheats = true;
+        player.sendMessage("Bhop cheats enabled");
+    }
+
+    public boolean isCheated() {
+        return cheats;
     }
 
     public void tick() {

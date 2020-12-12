@@ -1,6 +1,7 @@
 package ru.sooslick.bhop;
 
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
@@ -113,10 +114,18 @@ public class Engine extends JavaPlugin {
             activePlayers.remove(activeBhpl);
 
         //create new BhopPlayer and prepare him
-        activePlayers.add(new BhopPlayer(p, bhl));
+        BhopPlayer bhpl = new BhopPlayer(p, bhl);
+        activePlayers.add(bhpl);
         //todo check result and cancel start if fail
         InventoryUtil.invToFile(p);
         p.teleport(bhl.getStartPosition());
+
+        //check gamemode
+        if (p.getGameMode() == GameMode.SPECTATOR)
+            p.setGameMode(GameMode.ADVENTURE);
+        else if (p.getGameMode() != GameMode.SURVIVAL)
+            //todo: more cheats checks: ingame gamemodes, teleports, commands, etc admin features
+            bhpl.enableCheats();
 
         //launch timer if not exists
         if (bhopTimerId == 0) { //todo check can scheduler return 0 as ID
@@ -181,6 +190,9 @@ public class Engine extends JavaPlugin {
             return;
         //todo: save player's time and check best times.
         bhpl.getPlayer().sendMessage("Level finished in " + bhpl.getTimer());
+        if (!bhpl.isCheated()) {
+            //todo save rec
+        }
         playerExitEvent(bhpl);
     }
 
