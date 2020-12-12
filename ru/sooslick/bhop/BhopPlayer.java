@@ -68,7 +68,7 @@ public class BhopPlayer {
 
     public void tick() {
         timer++;
-        if (BhopUtil.isInside(player.getLocation(), level.getBound1(), level.getBound2())) {
+        if (level.isInside(player.getLocation())) {
             if (fleeTimer > 0) {
                 fleeTimer = 0;
                 player.sendMessage("Welcome back");

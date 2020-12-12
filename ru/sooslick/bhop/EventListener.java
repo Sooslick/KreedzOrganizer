@@ -2,10 +2,14 @@ package ru.sooslick.bhop;
 
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityPickupItemEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -69,6 +73,46 @@ public class EventListener implements Listener {
 
         bhpl.setPlayer(p);
         p.sendMessage("You have an unfinished bhop level, type /bhop continue to return");
+    }
+
+    public void onBlockChange(BlockEvent e) {
+        if (!(e instanceof Cancellable))
+            return;
+
+        Cancellable ce = (Cancellable) e;
+        if (ce.isCancelled())
+            return;
+
+        //check is block inside any level
+        for (BhopLevel level : engine.getBhopLevelList()) {
+            if (level.isInside(e.getBlock().getLocation())) {
+                ce.setCancelled(true);
+                return;
+            }
+        }
+    }
+
+    public void onDrop(PlayerDropItemEvent e) {
+        if (e.isCancelled())
+            return;
+        //check is block inside any level
+        for (BhopLevel level : engine.getBhopLevelList()) {
+            if (level.isInside(e.getPlayer().getLocation())) {
+                e.setCancelled(true);
+                return;
+            }
+        }
+    }
+
+    public void onPickup(EntityPickupItemEvent e) {
+        if (e.isCancelled())
+            return;
+        if (!(e.getEntity() instanceof Player))
+            return;
+        BhopPlayer bhpl = engine.getBhopPlayer((Player) e.getEntity());
+        if (bhpl == null)
+            return;
+        e.setCancelled(true);
     }
 
     private void checkTrigger(Player p, Block b, TriggerType type) {

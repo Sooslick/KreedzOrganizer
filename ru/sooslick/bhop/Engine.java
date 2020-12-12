@@ -89,6 +89,10 @@ public class Engine extends JavaPlugin {
         return sb.toString();
     }
 
+    public List<BhopLevel> getBhopLevelList() {
+        return levels;
+    }
+
     public BhopCheckpoint getBhopCheckpoint(BhopPlayer bhpl, String cpName) {
         if (bhpl == null)
             return null;

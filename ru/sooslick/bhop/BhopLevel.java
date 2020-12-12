@@ -102,4 +102,8 @@ public class BhopLevel {
     public boolean isChanged() {
         return edit;
     }
+
+    public boolean isInside(Location l) {
+        return BhopUtil.isInside(l, bound1, bound2);
+    }
 }
