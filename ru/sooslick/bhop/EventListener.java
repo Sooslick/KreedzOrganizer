@@ -1,7 +1,5 @@
 package ru.sooslick.bhop;
 
-import org.bukkit.Bukkit;
-import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -15,7 +13,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 public class EventListener implements Listener {
 
-    private Engine engine;
+    private final Engine engine;
 
     public EventListener(Engine e) {
         engine = e;
@@ -70,7 +68,7 @@ public class EventListener implements Listener {
             return;
 
         bhpl.setPlayer(p);
-        p.sendMessage("слыш прыгать /bhop continue"); //todo msg
+        p.sendMessage("You have an unfinished bhop level, type /bhop continue to return");
     }
 
     private void checkTrigger(Player p, Block b, TriggerType type) {

@@ -83,6 +83,12 @@ public class Engine extends JavaPlugin {
         return null;
     }
 
+    public String getBhopLevels() {
+        StringBuilder sb = new StringBuilder();
+        levels.forEach(level -> sb.append(level.getName()).append(", "));
+        return sb.toString();
+    }
+
     public BhopCheckpoint getBhopCheckpoint(BhopPlayer bhpl, String cpName) {
         if (bhpl == null)
             return null;
@@ -117,7 +123,7 @@ public class Engine extends JavaPlugin {
     public void playerLoadEvent(BhopPlayer bhpl, BhopCheckpoint cp) {
         if (bhpl == null)
             return;
-        if (!bhpl.getCheckpoints().contains(cp))
+        if (!bhpl.getCheckpointsList().contains(cp))
             return;
         Player p = bhpl.getPlayer();
         p.teleport(cp.getLoadLocation());
@@ -169,8 +175,8 @@ public class Engine extends JavaPlugin {
     public void playerFinishEvent(BhopPlayer bhpl) {
         if (bhpl == null)
             return;
-        //todo: save player's time and send MESSAGE.
-        bhpl.getPlayer().sendMessage("MOLODEC.");
+        //todo: save player's time and check best times.
+        bhpl.getPlayer().sendMessage("Level finished in " + bhpl.getTimer());
         playerExitEvent(bhpl);
     }
 
@@ -255,7 +261,7 @@ public class Engine extends JavaPlugin {
         for (Object obj : csLevels) {
             String levelName = (String) obj;
             if (getBhopLevel(levelName) != null) {
-                LOG.warning("Level " + levelName + " dublication in config.yml, skipping");
+                LOG.warning("Level " + levelName + " duplication in config.yml, skipping");
                 continue;
             }
             try {
@@ -300,7 +306,7 @@ public class Engine extends JavaPlugin {
                 //save level
                 levels.add(bhopLevel);
             } catch (Exception e) {
-                LOG.warning("Error occured while reading level " + levelName);
+                LOG.warning("Error occurred while reading level " + levelName);
                 LOG.warning(e.getMessage());
                 e.printStackTrace();
             }

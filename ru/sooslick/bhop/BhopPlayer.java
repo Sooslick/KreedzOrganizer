@@ -36,12 +36,18 @@ public class BhopPlayer {
 
     public BhopLevel getLevel() { return level; }
 
-    public List<BhopCheckpoint> getCheckpoints() {
+    public List<BhopCheckpoint> getCheckpointsList() {
         return checkpoints;
     }
 
     public void addCheckpoint(BhopCheckpoint cp) {
         checkpoints.add(cp);
+    }
+
+    public String getCheckpoints() {
+        StringBuilder sb = new StringBuilder();
+        checkpoints.forEach(cp -> sb.append(cp.getName()).append(", "));
+        return sb.toString();
     }
 
     public Location getComebackLocation() {
@@ -56,19 +62,23 @@ public class BhopPlayer {
         dcLocation = l;
     }
 
+    public int getTimer() {
+        return timer;
+    }
+
     public void tick() {
         timer++;
         if (BhopUtil.isInside(player.getLocation(), level.getBound1(), level.getBound2())) {
             if (fleeTimer > 0) {
                 fleeTimer = 0;
-                player.sendMessage("welcome back"); //todo textovka
+                player.sendMessage("Welcome back");
             }
         } else {
             if (fleeTimer++ == 1) {
-                player.sendMessage("You are outside BhopLevel. Return back plz");   //todo norm textovka
+                player.sendMessage("You are outside of level. Let's come back!");
             }
             if (fleeTimer > 5) {
-                player.sendMessage(15 - fleeTimer + " seconds to exit");    //todo norm textovka
+                player.sendMessage(15 - fleeTimer + " seconds to exit");
                 if (fleeTimer > 15) {
                     Engine.getInstance().playerExitEvent(this);
                 }

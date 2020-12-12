@@ -13,6 +13,19 @@ public class CommandListener implements CommandExecutor {
     private static final String COMMAND_LOAD = "load";
     private static final String COMMAND_EXIT = "exit";
     private static final String COMMAND_CONTINUE = "continue";
+    //todo HELP, LEVELS, CHECKPOINTS
+
+    private static final String AVAILABLE_CHECKPOINTS = "Available points:";
+    private static final String AVAILABLE_LEVELS = "Available levels:";
+    private static final String CHECKPOINT_LOADED = "Checkpoint %s loaded.";
+    private static final String CHECKPOINT_NOT_FOUND = "Checkpoint not found.";
+    private static final String CHECKPOINT_REQUIRED = "Checkpoint name required.";
+    private static final String CONSOLE_CANNOT_BHOP = "Console is not allowed to play bhop";
+    private static final String GAME_RESTORED = "Latest bhop state restored";
+    private static final String LEVEL_NOT_FOUND = "Level not found.";
+    private static final String LEVEL_REQUIRED = "Level name required.";
+    private static final String LEVEL_STARTED = "Level %s started";
+    private static final String NOT_PLAYING = "You are not in-game";
 
     public CommandListener(Engine engine) {
         this.engine = engine;
@@ -20,67 +33,78 @@ public class CommandListener implements CommandExecutor {
 
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length == 0)
-            return sendInfoMessage(sender, "infomessage"); //todo
+            return sendMessageAndReturn(sender, command.getUsage());
         switch (args[0].toLowerCase()) {
             case COMMAND_START:
                 //console can't play bhop
                 if (!(sender instanceof Player))
-                    return sendInfoMessage(sender, "xaxa console cannot bhop )))"); //todo
+                    return sendMessageAndReturn(sender, CONSOLE_CANNOT_BHOP);
                 Player player = (Player) sender;
                 //check level
-                if (args.length == 1)
-                    return sendInfoMessage(sender, "infomessage - level required"); //todo
+                if (args.length == 1) {
+                    sender.sendMessage(LEVEL_REQUIRED);
+                    sender.sendMessage(AVAILABLE_LEVELS);
+                    return sendMessageAndReturn(sender, engine.getBhopLevels());
+                }
                 BhopLevel bhl = engine.getBhopLevel(args[1]);
-                if (bhl == null)
-                    return sendInfoMessage(sender, "infomessage"); //todo
+                if (bhl == null) {
+                    sender.sendMessage(LEVEL_NOT_FOUND);
+                    sender.sendMessage(AVAILABLE_LEVELS);
+                    return sendMessageAndReturn(sender, engine.getBhopLevels());
+                }
                 //trigger start event
                 engine.playerStartEvent(player, bhl);
-                return true;
+                return sendMessageAndReturn(sender, String.format(LEVEL_STARTED, bhl.getName()));
             case COMMAND_LOAD:
                 //console can't play bhop
                 if (!(sender instanceof Player))
-                    return sendInfoMessage(sender, "xaxa console cannot bhop )))"); //todo
-                //check checkpoint
-                if (args.length == 1)
-                    return sendInfoMessage(sender, "infomessage"); //todo
+                    return sendMessageAndReturn(sender, CONSOLE_CANNOT_BHOP);
+                //check player
                 BhopPlayer bhpl = engine.getBhopPlayer((Player) sender);
                 if (bhpl == null)
-                    return sendInfoMessage(sender, "infomessage"); //todo
+                    return sendMessageAndReturn(sender, NOT_PLAYING);
+                //check checkpoint
+                if (args.length == 1) {
+                    sender.sendMessage(CHECKPOINT_REQUIRED);
+                    sender.sendMessage(AVAILABLE_CHECKPOINTS);
+                    return sendMessageAndReturn(sender, bhpl.getCheckpoints());
+                }
                 BhopCheckpoint bhcp = engine.getBhopCheckpoint(bhpl, args[1]);
-                if (bhcp == null)
-                    return sendInfoMessage(sender, "infomessage"); //todo
+                if (bhcp == null) {
+                    sender.sendMessage(CHECKPOINT_NOT_FOUND);
+                    sender.sendMessage(AVAILABLE_CHECKPOINTS);
+                    return sendMessageAndReturn(sender, bhpl.getCheckpoints());
+                }
                 engine.playerLoadEvent(bhpl, bhcp);
-                break;
+                return sendMessageAndReturn(sender, String.format(CHECKPOINT_LOADED, bhcp.getName()));
             case COMMAND_EXIT:
                 //console can't play bhop
                 if (!(sender instanceof Player))
-                    return sendInfoMessage(sender, "xaxa console cannot bhop )))"); //todo
+                    return sendMessageAndReturn(sender, CONSOLE_CANNOT_BHOP);
                 //check player
                 bhpl = engine.getBhopPlayer((Player) sender);
                 if (bhpl == null)
-                    return sendInfoMessage(sender, "гаф тяф"); //todo
+                    return sendMessageAndReturn(sender, NOT_PLAYING);
                 engine.playerExitEvent(bhpl);
-                break;
+                return true;
             case COMMAND_CONTINUE:
                 //console can't play bhop
                 if (!(sender instanceof Player))
-                    return sendInfoMessage(sender, "xaxa console cannot bhop )))"); //todo
+                    return sendMessageAndReturn(sender, CONSOLE_CANNOT_BHOP);
                 //get bhop player from dc
                 bhpl = engine.getDcPlayer((Player) sender);
                 if (bhpl == null)
-                    return sendInfoMessage(sender, "гаф тяф"); //todo
+                    return sendMessageAndReturn(sender, NOT_PLAYING);
                 //then trigger rejoin event
                 engine.playerRejoinEvent(bhpl);
+                return sendMessageAndReturn(sender, GAME_RESTORED);
             default:
-                return sendInfoMessage(sender, "infomessage"); //todo
+                return sendMessageAndReturn(sender, command.getUsage());
         }
-        return false;
     }
 
-    //todo weird method. Make void
-    private boolean sendInfoMessage(CommandSender sender, String message) {
+    private boolean sendMessageAndReturn(CommandSender sender, String message) {
         sender.sendMessage(message);
         return true;
     }
-
 }
