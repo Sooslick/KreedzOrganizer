@@ -83,12 +83,7 @@ public class BhopLevel {
     }
 
     public BhopCheckpoint getCheckpoint(String name) {
-        for (BhopCheckpoint bhcp : checkpoints) {
-            if (bhcp.getName().equals(name)) {
-                return bhcp;
-            }
-        }
-        return null;
+        return checkpoints.stream().filter(cp -> cp.getName().equals(name)).findFirst().orElse(null);
     }
 
     public void addRecord(BhopRecord rec) {
@@ -97,6 +92,10 @@ public class BhopLevel {
 
     public List<BhopRecord> getRecords() {
         return records;
+    }
+
+    public BhopRecord getPlayerRecord(String playerName) {
+        return records.stream().filter(r -> r.getName().equals(playerName)).findFirst().orElse(null);
     }
 
     public boolean isChanged() {

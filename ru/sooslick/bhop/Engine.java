@@ -103,7 +103,8 @@ public class Engine extends JavaPlugin {
             LOG.warning("Detected BhopPlayer without Level, player - " + bhpl.getPlayer().getName());
             return null;
         }
-        return bhl.getCheckpoint(cpName);
+        BhopCheckpoint bhcp = bhl.getCheckpoint(cpName);
+        return bhpl.getCheckpointsSet().contains(bhcp) ? bhcp : null;
     }
 
     public void playerStartEvent(Player p, BhopLevel bhl) {
@@ -141,7 +142,7 @@ public class Engine extends JavaPlugin {
             return;
         Player p = bhpl.getPlayer();
         p.teleport(cp.getLoadLocation());
-        p.sendMessage("Loaded checkpoint " + cp.getName());
+        p.sendMessage("§eLoaded checkpoint " + cp.getName());
     }
 
     public void playerRejoinEvent(BhopPlayer bhpl) {
@@ -190,9 +191,16 @@ public class Engine extends JavaPlugin {
         if (bhpl == null)
             return;
         //todo: save player's time and check best times.
-        bhpl.getPlayer().sendMessage("Level finished in " + bhpl.getTimer());
+        bhpl.getPlayer().sendMessage("§aLevel finished in " + bhpl.getTimer());
         if (!bhpl.isCheated()) {
-            //todo save rec
+            BhopRecord rec = bhpl.getLevel().getPlayerRecord(bhpl.getPlayer().getName());
+            if (rec == null) {
+                rec = new BhopRecord(bhpl.getPlayer().getName(), bhpl.getTimer());
+                bhpl.getLevel().addRecord(rec);
+            } else {
+                rec.setTime(bhpl.getTimer());
+            }
+            //todo check PB and WR
         }
         playerExitEvent(bhpl);
     }
@@ -201,24 +209,17 @@ public class Engine extends JavaPlugin {
         if (bhpl == null || cp == null)
             return;
         if (bhpl.addCheckpoint(cp))
-            bhpl.getPlayer().sendMessage("Reached checkpoint " + cp.getName());
+            bhpl.getPlayer().sendMessage("§aReached checkpoint " + cp.getName() +
+                    ". Use §6/bhop load " + cp.getName() + " §ato teleport to this point");
     }
 
     public BhopPlayer getBhopPlayer(Player p) {
-        for (BhopPlayer bhpl : activePlayers) {
-            if (bhpl.getPlayer().equals(p)) return bhpl;
-        }
-        return null;
+        return activePlayers.stream().filter(bhpl -> bhpl.getPlayer().equals(p)).findFirst().orElse(null);
     }
 
     public BhopPlayer getDcPlayer(Player p) {
-        for (BhopPlayer dc : dcPlayers) {
-            // Player objects may be not equals, check by names
-            if (dc.getPlayer().getName().equals(p.getName())) {
-                return dc;
-            }
-        }
-        return null;
+        // Player objects may be not equals, check by names
+        return dcPlayers.stream().filter(dc -> dc.getPlayer().getName().equals(p.getName())).findFirst().orElse(null);
     }
 
     public int getActivePlayersCount() {
@@ -226,7 +227,9 @@ public class Engine extends JavaPlugin {
     }
 
     private void reload() {
+        //todo a lot of rework required: reinit variables, listeners and reload configs.
         LOG = Bukkit.getLogger();
+        LOG.info("Bhop init");
 
         //check plugin directory. Create if not exists
         boolean folderCreated = false;
@@ -298,28 +301,32 @@ public class Engine extends JavaPlugin {
 
                 //read level's checkpoints data
                 ConfigurationSection csCheckpoints = csParams.getConfigurationSection("checkpoints");
-                for (String cpName : csCheckpoints.getKeys(false)) {
-                    ConfigurationSection cpData = csCheckpoints.getConfigurationSection(cpName);
-                    Location load = BhopUtil.stringToLocation(w, cpData.getString("loadLocation"));
-                    Location trigger;
-                    TriggerType type;
-                    try {
-                        trigger = BhopUtil.stringToLocation(w, cpData.getString("triggerLocation"));
-                    } catch (Exception e) {
-                        trigger = load;
+                if (csCheckpoints != null) {
+                    for (String cpName : csCheckpoints.getKeys(false)) {
+                        ConfigurationSection cpData = csCheckpoints.getConfigurationSection(cpName);
+                        Location load = BhopUtil.stringToLocation(w, cpData.getString("loadLocation"));
+                        Location trigger;
+                        TriggerType type;
+                        try {
+                            trigger = BhopUtil.stringToLocation(w, cpData.getString("triggerLocation"));
+                        } catch (Exception e) {
+                            trigger = load;
+                        }
+                        try {
+                            type = TriggerType.valueOf(cpData.getString("triggerType").toUpperCase());
+                        } catch (Exception e) {
+                            type = TriggerType.MOVEMENT;
+                        }
+                        bhopLevel.addCheckpoint(new BhopCheckpoint(cpName, load, trigger, type));
                     }
-                    try {
-                        type = TriggerType.valueOf(cpData.getString("triggerType").toUpperCase());
-                    } catch (Exception e) {
-                        type = TriggerType.MOVEMENT;
-                    }
-                    bhopLevel.addCheckpoint(new BhopCheckpoint(cpName, load, trigger, type));
                 }
 
                 //read level's leaderboard
                 ConfigurationSection csRecords = csParams.getConfigurationSection("leaderboard");
-                for (String recHolder : csRecords.getKeys(false)) {
-                    bhopLevel.addRecord(new BhopRecord(recHolder, csRecords.getInt(recHolder)));
+                if (csRecords != null) {
+                    for (String recHolder : csRecords.getKeys(false)) {
+                        bhopLevel.addRecord(new BhopRecord(recHolder, csRecords.getInt(recHolder)));
+                    }
                 }
 
                 //save level
@@ -330,6 +337,7 @@ public class Engine extends JavaPlugin {
                 e.printStackTrace();
             }
         }
+        LOG.info("Loaded " + levels.size() + " Bhop levels");
     }
 
     private void saveAll() {
@@ -345,6 +353,7 @@ public class Engine extends JavaPlugin {
             FileConfiguration mainCfg = new YamlConfiguration();
             mainCfg.set(CFG_LEVELS, levelNames);
             mainCfg.save(DATA_FOLDER_PATH + CFG_FILENAME);
+            LOG.info("Saved config");
         } catch (Exception e) {
             LOG.warning("Unable to save config");
         }
@@ -375,6 +384,7 @@ public class Engine extends JavaPlugin {
             }
             levelCfg.set("leaderboard", csHs);
             levelCfg.save(LEVELS_PATH + level.getName() + YAML_EXTENSION);
+            LOG.info("Saved level " + level.getName());
         } catch (Exception e) {
             LOG.warning("Unable to save level " + level.getName());
         }

@@ -4,16 +4,15 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 
 public class BhopPlayer {
 
     private Player player;
-    private BhopLevel level;
+    private final BhopLevel level;
     private int timer;
-    private Set<BhopCheckpoint> checkpoints;
-    private Location comeback;
+    private final Set<BhopCheckpoint> checkpoints;
+    private final Location comeback;
     private Location dcLocation;
     private int fleeTimer;
     private boolean cheats;
@@ -71,7 +70,7 @@ public class BhopPlayer {
 
     public void enableCheats() {
         cheats = true;
-        player.sendMessage("Bhop cheats enabled");
+        player.sendMessage("§cBhop cheats enabled");
     }
 
     public boolean isCheated() {
@@ -82,16 +81,17 @@ public class BhopPlayer {
         timer++;
         if (level.isInside(player.getLocation())) {
             if (fleeTimer > 0) {
+                if (fleeTimer > 5)
+                    player.sendMessage("§eWelcome back");
                 fleeTimer = 0;
-                player.sendMessage("Welcome back");
             }
         } else {
             if (fleeTimer++ == 1) {
-                player.sendMessage("You are outside of level. Let's come back!");
+                player.sendMessage("§cYou are outside of level. Let's come back!");
             }
-            if (fleeTimer > 5) {
-                player.sendMessage(15 - fleeTimer + " seconds to exit");
-                if (fleeTimer > 15) {
+            if (fleeTimer % 5 == 0) {
+                player.sendMessage("§c" + (15 - fleeTimer) + " seconds to exit");
+                if (fleeTimer >= 15) {
                     Engine.getInstance().playerExitEvent(this);
                 }
             }

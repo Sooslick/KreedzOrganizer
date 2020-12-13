@@ -1,5 +1,6 @@
 package ru.sooslick.bhop;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -14,13 +15,12 @@ import java.util.List;
 public class InventoryUtil {
 
     public static boolean invToFile(Player p) {
+        Bukkit.getLogger().info("saving inventory of player " + p.getName());
         //store inv contents to file
         File f = new File(Engine.INVENTORY_PATH + p.getName() + Engine.YAML_EXTENSION);
         YamlConfiguration yaml = new YamlConfiguration();
         PlayerInventory inv = p.getInventory();
         yaml.set("inventory.content", inv.getContents());
-        yaml.set("inventory.armor", inv.getArmorContents());
-        //todo offHand + extra slots?
         //try to save file
         try {
             yaml.save(f);
@@ -35,6 +35,7 @@ public class InventoryUtil {
     }
 
     public static boolean invFromFile(Player p) {
+        Bukkit.getLogger().info("loading inventory of player " + p.getName());
         File f = new File(Engine.INVENTORY_PATH + p.getName() + Engine.YAML_EXTENSION);
         YamlConfiguration yaml = new YamlConfiguration();
         try {
@@ -43,15 +44,12 @@ public class InventoryUtil {
             return false;
         }
         ItemStack[] content = ((List<ItemStack>) yaml.get("inventory.content")).toArray(new ItemStack[0]);
-        ItemStack[] armor = ((List<ItemStack>) yaml.get("inventory.armor")).toArray(new ItemStack[0]);
         if (!f.delete()) {
             return false;
         }
         PlayerInventory inv = p.getInventory();
         inv.clear();
         inv.setContents(content);
-        inv.setArmorContents(armor);
-        //todo hand + extra slots?
         return true;
     }
 }

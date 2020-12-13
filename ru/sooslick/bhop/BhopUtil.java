@@ -1,5 +1,6 @@
 package ru.sooslick.bhop;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 
@@ -9,10 +10,22 @@ public class BhopUtil {
 
     public static Location stringToLocation(String s) {
         String[] coords = s.split(COMMA);
+        if (coords.length == 3)
         return new Location(null,
                 Double.parseDouble(coords[0]),
                 Double.parseDouble(coords[1]),
                 Double.parseDouble(coords[2]));
+        else if (coords.length == 5)
+            return new Location(null,
+                    Double.parseDouble(coords[0]),
+                    Double.parseDouble(coords[1]),
+                    Double.parseDouble(coords[2]),
+                    Float.parseFloat(coords[3]),
+                    Float.parseFloat(coords[4]));
+        else {
+            Bukkit.getLogger().warning("stringToLocation: wrong Location format | " + s);
+            return null;
+        }
     }
 
     public static Location stringToLocation(World w, String s) {

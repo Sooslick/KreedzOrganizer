@@ -15,17 +15,16 @@ public class CommandListener implements CommandExecutor {
     private static final String COMMAND_CONTINUE = "continue";
     //todo HELP, LEVELS, CHECKPOINTS
 
-    private static final String AVAILABLE_CHECKPOINTS = "Available points:";
-    private static final String AVAILABLE_LEVELS = "Available levels:";
-    private static final String CHECKPOINT_LOADED = "Checkpoint %s loaded.";
-    private static final String CHECKPOINT_NOT_FOUND = "Checkpoint not found.";
-    private static final String CHECKPOINT_REQUIRED = "Checkpoint name required.";
+    private static final String AVAILABLE_CHECKPOINTS = "§eAvailable points:";
+    private static final String AVAILABLE_LEVELS = "§eAvailable levels:";
+    private static final String CHECKPOINT_NOT_FOUND = "§cUnknown checkpoint.";
+    private static final String CHECKPOINT_REQUIRED = "§cCheckpoint name required.";
     private static final String CONSOLE_CANNOT_BHOP = "Console is not allowed to play bhop";
-    private static final String GAME_RESTORED = "Latest bhop state restored";
-    private static final String LEVEL_NOT_FOUND = "Level not found.";
-    private static final String LEVEL_REQUIRED = "Level name required.";
-    private static final String LEVEL_STARTED = "Level %s started";
-    private static final String NOT_PLAYING = "You are not in-game";
+    private static final String GAME_RESTORED = "§cLatest bhop state restored";
+    private static final String LEVEL_NOT_FOUND = "§cLevel not found.";
+    private static final String LEVEL_REQUIRED = "§cLevel name required.";
+    private static final String LEVEL_STARTED = "§eLevel %s started";
+    private static final String NOT_PLAYING = "§cYou are not in-game";
 
     public CommandListener(Engine engine) {
         this.engine = engine;
@@ -76,7 +75,7 @@ public class CommandListener implements CommandExecutor {
                     return sendMessageAndReturn(sender, bhpl.getCheckpoints());
                 }
                 engine.playerLoadEvent(bhpl, bhcp);
-                return sendMessageAndReturn(sender, String.format(CHECKPOINT_LOADED, bhcp.getName()));
+                return true;
             case COMMAND_EXIT:
                 //console can't play bhop
                 if (!(sender instanceof Player))

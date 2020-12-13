@@ -1,14 +1,13 @@
 package ru.sooslick.bhop;
 
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
@@ -20,6 +19,8 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 
+import java.io.File;
+
 public class EventListener implements Listener {
 
     private final Engine engine;
@@ -30,14 +31,15 @@ public class EventListener implements Listener {
 
     @EventHandler
     public void onInteract(PlayerInteractEvent e) {
-        if (e.getAction() != Action.RIGHT_CLICK_BLOCK)
-            return;
-        checkTrigger(e.getPlayer(), e.getClickedBlock(), TriggerType.INTERACT);
+        if (e.getAction() == Action.RIGHT_CLICK_BLOCK || e.getAction() == Action.LEFT_CLICK_BLOCK)
+            checkTrigger(e.getPlayer(), e.getClickedBlock(), TriggerType.INTERACT);
     }
 
     @EventHandler
     public void onMove(PlayerMoveEvent e) {
         //todo: load test
+        if (e.getTo() == null)
+            return;
         checkTrigger(e.getPlayer(), e.getTo().getBlock(), TriggerType.MOVEMENT);
     }
 
@@ -78,7 +80,8 @@ public class EventListener implements Listener {
             return;
         if (engine.getBhopPlayer((Player) e.getEntity()) == null)
             return;
-        e.setCancelled(true);
+        if (((Player) e.getEntity()).getFoodLevel() > e.getFoodLevel())
+            e.setCancelled(true);
     }
 
     @EventHandler
@@ -95,13 +98,20 @@ public class EventListener implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
+        //restore inv if inv file exists
+        File f = new File(Engine.INVENTORY_PATH + e.getPlayer().getName() + Engine.YAML_EXTENSION);
+        if (f.exists()) {
+            InventoryUtil.invFromFile(e.getPlayer());
+            Bukkit.getLogger().info("Restored inventory of player " + e.getPlayer().getName());
+        }
+
+        //check dc
         Player p = e.getPlayer();
         BhopPlayer bhpl = engine.getDcPlayer(p);
         if (bhpl == null)
             return;
-
         bhpl.setPlayer(p);
-        p.sendMessage("You have an unfinished bhop level, type /bhop continue to return");
+        p.sendMessage("§eYou have an unfinished bhop level, type §6/bhop continue §eto return");
     }
 
     @EventHandler
@@ -176,7 +186,7 @@ public class EventListener implements Listener {
         }
         //check cpoint
         for (BhopCheckpoint bhcp : bhl.getCheckpoints()) {
-            if (bhcp.getTriggerType() == type && b.equals(bhl.getWorld().getBlockAt(bhcp.getLoadLocation()))) {
+            if (bhcp.getTriggerType() == type && b.equals(bhl.getWorld().getBlockAt(bhcp.getTriggerLocation()))) {
                 engine.playerCheckpointEvent(bhpl, bhcp);
                 return;
             }

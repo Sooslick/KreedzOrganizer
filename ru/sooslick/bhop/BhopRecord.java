@@ -3,7 +3,7 @@ package ru.sooslick.bhop;
 public class BhopRecord {
 
     private final String playerName;
-    private final int playerTime;
+    private int playerTime;
 
     public BhopRecord(String name, int time) {
         playerName = name;
@@ -16,5 +16,9 @@ public class BhopRecord {
 
     public int getTime() {
         return playerTime;
+    }
+
+    public void setTime(int newTime) {
+        playerTime = newTime;
     }
 }
