@@ -49,7 +49,9 @@ public class EventListener implements Listener {
             return;
         if (engine.getBhopPlayer(e.getPlayer()) == null)
             return;
-        //todo test teleports and quits.
+        PlayerTeleportEvent.TeleportCause tc = e.getCause();
+        if (tc == PlayerTeleportEvent.TeleportCause.CHORUS_FRUIT ||
+            tc == PlayerTeleportEvent.TeleportCause.ENDER_PEARL)
         e.setCancelled(true);
     }
 
@@ -103,27 +105,30 @@ public class EventListener implements Listener {
     }
 
     @EventHandler
-    public void onBlockChange(BlockEvent e) {
-        if (!(e instanceof Cancellable))
+    public void onBlockBreak(BlockBreakEvent e) {
+        if (e.isCancelled())
             return;
-        Cancellable ce = (Cancellable) e;
-        if (ce.isCancelled())
+        if (e.getPlayer().getGameMode() == GameMode.CREATIVE)
             return;
-
-        //check break by admin player
-        if (e instanceof BlockBreakEvent) {
-            if (((BlockBreakEvent) e).getPlayer().getGameMode() == GameMode.CREATIVE)
-                return;
-        }
-        if (e instanceof BlockPlaceEvent) {
-            if (((BlockPlaceEvent) e).getPlayer().getGameMode() == GameMode.CREATIVE)
-                return;
-        }
-
         //check is block inside any level
         for (BhopLevel level : engine.getBhopLevelList()) {
             if (level.isInside(e.getBlock().getLocation())) {
-                ce.setCancelled(true);
+                e.setCancelled(true);
+                return;
+            }
+        }
+    }
+
+    @EventHandler
+    public void onBlockPlace(BlockPlaceEvent e) {
+        if (e.isCancelled())
+            return;
+        if (e.getPlayer().getGameMode() == GameMode.CREATIVE)
+            return;
+        //check is block inside any level
+        for (BhopLevel level : engine.getBhopLevelList()) {
+            if (level.isInside(e.getBlock().getLocation())) {
+                e.setCancelled(true);
                 return;
             }
         }

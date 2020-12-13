@@ -3,15 +3,16 @@ package ru.sooslick.bhop;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 public class BhopPlayer {
 
     private Player player;
     private BhopLevel level;
     private int timer;
-    private List<BhopCheckpoint> checkpoints;
+    private Set<BhopCheckpoint> checkpoints;
     private Location comeback;
     private Location dcLocation;
     private int fleeTimer;
@@ -22,7 +23,7 @@ public class BhopPlayer {
         level = bl;
         timer = 0;
         fleeTimer = 0;
-        checkpoints = new ArrayList<>();
+        checkpoints = new LinkedHashSet<>();
         comeback = player.getLocation();
         dcLocation = level.getStartPosition();
         cheats = false;
@@ -38,12 +39,12 @@ public class BhopPlayer {
 
     public BhopLevel getLevel() { return level; }
 
-    public List<BhopCheckpoint> getCheckpointsList() {
+    public Set<BhopCheckpoint> getCheckpointsSet() {
         return checkpoints;
     }
 
-    public void addCheckpoint(BhopCheckpoint cp) {
-        checkpoints.add(cp);
+    public boolean addCheckpoint(BhopCheckpoint cp) {
+        return checkpoints.add(cp);
     }
 
     public String getCheckpoints() {

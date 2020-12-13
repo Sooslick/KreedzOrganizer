@@ -22,7 +22,7 @@ import java.util.logging.Logger;
 
 public class Engine extends JavaPlugin {
 
-    public static final String CFG_FILENAME = "plugin.yml";
+    public static final String CFG_FILENAME = "config.yml";
     public static final String CFG_DEFAULT_LEVEL = "defaultLevel.yml";
     public static final String CFG_LEVELS = "levels";
     public static final String CFG_INVENTORY = "inventory";
@@ -42,6 +42,7 @@ public class Engine extends JavaPlugin {
     private List<BhopPlayer> dcPlayers;
     private int bhopTimerId = 0;
 
+    //todo: concurrent mod
     private Runnable bhopTimerProcessor = () -> {
         for (BhopPlayer bhpl : activePlayers) {
             bhpl.tick();
@@ -136,7 +137,7 @@ public class Engine extends JavaPlugin {
     public void playerLoadEvent(BhopPlayer bhpl, BhopCheckpoint cp) {
         if (bhpl == null)
             return;
-        if (!bhpl.getCheckpointsList().contains(cp))
+        if (!bhpl.getCheckpointsSet().contains(cp))
             return;
         Player p = bhpl.getPlayer();
         p.teleport(cp.getLoadLocation());
@@ -199,7 +200,8 @@ public class Engine extends JavaPlugin {
     public void playerCheckpointEvent(BhopPlayer bhpl, BhopCheckpoint cp) {
         if (bhpl == null || cp == null)
             return;
-        bhpl.addCheckpoint(cp);
+        if (bhpl.addCheckpoint(cp))
+            bhpl.getPlayer().sendMessage("Reached checkpoint " + cp.getName());
     }
 
     public BhopPlayer getBhopPlayer(Player p) {
@@ -251,10 +253,11 @@ public class Engine extends JavaPlugin {
                                 throw new IOException();
                             }
                         }
-                        BufferedReader br = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream(CFG_DEFAULT_LEVEL)));
+//                        BufferedReader br = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream(CFG_DEFAULT_LEVEL)));
+                        BufferedReader br = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream("/defaultLevel.yml")));
                         PrintWriter pw = new PrintWriter(new File(LEVELS_PATH + CFG_DEFAULT_LEVEL));
                         String s;
-                        while (!(s = br.readLine()).isEmpty()) {
+                        while ((s = br.readLine()) != null) {
                             pw.println(s);
                         }
                         pw.flush();
@@ -291,7 +294,7 @@ public class Engine extends JavaPlugin {
                         BhopUtil.stringToLocation(w, csParams.getString("bound2")));
                 bhopLevel.setStart(BhopUtil.stringToLocation(w, csParams.getString("start")));
                 bhopLevel.setFinish(BhopUtil.stringToLocation(w, csParams.getString("finish")));
-                bhopLevel.setTriggerType(TriggerType.valueOf(csParams.getString("triggerType")));
+                bhopLevel.setTriggerType(TriggerType.valueOf(csParams.getString("triggerType").toUpperCase()));
 
                 //read level's checkpoints data
                 ConfigurationSection csCheckpoints = csParams.getConfigurationSection("checkpoints");
@@ -306,7 +309,7 @@ public class Engine extends JavaPlugin {
                         trigger = load;
                     }
                     try {
-                        type = TriggerType.valueOf(cpData.getString("triggerType"));
+                        type = TriggerType.valueOf(cpData.getString("triggerType").toUpperCase());
                     } catch (Exception e) {
                         type = TriggerType.MOVEMENT;
                     }
