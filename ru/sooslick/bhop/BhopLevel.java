@@ -98,6 +98,10 @@ public class BhopLevel {
         return records.stream().filter(r -> r.getName().equals(playerName)).findFirst().orElse(null);
     }
 
+    public BhopRecord getLevelRecord() {
+        return records.stream().sorted().findFirst().orElse(null);
+    }
+
     public boolean isChanged() {
         return edit;
     }

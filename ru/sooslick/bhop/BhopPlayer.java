@@ -9,7 +9,7 @@ import java.util.Set;
 public class BhopPlayer {
 
     private Player player;
-    private final BhopLevel level;
+    private BhopLevel level;
     private int timer;
     private final Set<BhopCheckpoint> checkpoints;
     private final Location comeback;
@@ -26,6 +26,14 @@ public class BhopPlayer {
         comeback = player.getLocation();
         dcLocation = level.getStartPosition();
         cheats = false;
+    }
+
+    public void restart(BhopLevel bl) {
+        level = bl;
+        timer = 0;
+        fleeTimer = 0;
+        checkpoints.clear();
+        dcLocation = level.getStartPosition();
     }
 
     public Player getPlayer() {

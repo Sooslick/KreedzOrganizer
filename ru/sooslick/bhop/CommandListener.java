@@ -13,7 +13,7 @@ public class CommandListener implements CommandExecutor {
     private static final String COMMAND_LOAD = "load";
     private static final String COMMAND_EXIT = "exit";
     private static final String COMMAND_CONTINUE = "continue";
-    //todo HELP, LEVELS, CHECKPOINTS
+    //todo HELP, LEVELS, CHECKPOINTS, VIEWSTATS
 
     private static final String AVAILABLE_CHECKPOINTS = "§eAvailable points:";
     private static final String AVAILABLE_LEVELS = "§eAvailable levels:";

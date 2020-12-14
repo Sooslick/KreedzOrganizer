@@ -108,18 +108,21 @@ public class Engine extends JavaPlugin {
     }
 
     public void playerStartEvent(Player p, BhopLevel bhl) {
+        LOG.info("Bhop player start event triggered");
         //remove player from DC list if presents
         dcPlayers.remove(getDcPlayer(p));
         //check if player triggered event while playing
         BhopPlayer activeBhpl = getBhopPlayer(p);
-        if (activeBhpl != null)
-            activePlayers.remove(activeBhpl);
-
-        //create new BhopPlayer and prepare him
-        BhopPlayer bhpl = new BhopPlayer(p, bhl);
-        activePlayers.add(bhpl);
-        //todo check result and cancel start if fail
-        InventoryUtil.invToFile(p);
+        if (activeBhpl != null) {
+            LOG.info("Player restarted level");
+            activeBhpl.restart(bhl);
+        } else {
+            //create new BhopPlayer and prepare him
+            activeBhpl = new BhopPlayer(p, bhl);
+            activePlayers.add(activeBhpl);
+            //todo check result and cancel start if fail
+            InventoryUtil.invToFile(p);
+        }
         p.teleport(bhl.getStartPosition());
 
         //check gamemode
@@ -127,15 +130,16 @@ public class Engine extends JavaPlugin {
             p.setGameMode(GameMode.ADVENTURE);
         else if (p.getGameMode() != GameMode.SURVIVAL)
             //todo: more cheats checks: ingame gamemodes, teleports, commands, etc admin features
-            bhpl.enableCheats();
+            activeBhpl.enableCheats();
 
         //launch timer if not exists
-        if (bhopTimerId == 0) { //todo check can scheduler return 0 as ID
+        if (bhopTimerId == 0) {
             bhopTimerId = Bukkit.getScheduler().scheduleSyncRepeatingTask(this, bhopTimerProcessor, 1, 20);
         }
     }
 
     public void playerLoadEvent(BhopPlayer bhpl, BhopCheckpoint cp) {
+        LOG.info("Bhop player load event triggered");
         if (bhpl == null)
             return;
         if (!bhpl.getCheckpointsSet().contains(cp))
@@ -146,6 +150,7 @@ public class Engine extends JavaPlugin {
     }
 
     public void playerRejoinEvent(BhopPlayer bhpl) {
+        LOG.info("Bhop player rejoin event triggered");
         if (bhpl == null)
             return;
         if (!dcPlayers.contains(bhpl))
@@ -157,7 +162,7 @@ public class Engine extends JavaPlugin {
         InventoryUtil.invToFile(bhpl.getPlayer());
         bhpl.getPlayer().teleport(bhpl.getDcLocation());
         //launch timer if not exists
-        if (bhopTimerId == 0) { //todo check can scheduler return 0 as ID
+        if (bhopTimerId == 0) {
             bhopTimerId = Bukkit.getScheduler().scheduleSyncRepeatingTask(this, bhopTimerProcessor, 1, 20);
         }
     }
@@ -167,6 +172,7 @@ public class Engine extends JavaPlugin {
     }
 
     public void playerExitEvent(BhopPlayer bhpl, boolean dc) {
+        LOG.info("Bhop player exit event triggered");
         if (bhpl == null)
             return;
         activePlayers.remove(bhpl);
@@ -188,24 +194,31 @@ public class Engine extends JavaPlugin {
     }
 
     public void playerFinishEvent(BhopPlayer bhpl) {
+        LOG.info("Bhop player finish event triggered");
         if (bhpl == null)
             return;
-        //todo: save player's time and check best times.
         bhpl.getPlayer().sendMessage("§aLevel finished in " + bhpl.getTimer());
         if (!bhpl.isCheated()) {
             BhopRecord rec = bhpl.getLevel().getPlayerRecord(bhpl.getPlayer().getName());
             if (rec == null) {
                 rec = new BhopRecord(bhpl.getPlayer().getName(), bhpl.getTimer());
                 bhpl.getLevel().addRecord(rec);
+                bhpl.getPlayer().sendMessage("§aNew personal best");
             } else {
-                rec.setTime(bhpl.getTimer());
+                if (bhpl.getTimer() < rec.getTime()) {
+                    rec.setTime(bhpl.getTimer());
+                    bhpl.getPlayer().sendMessage("§aNew personal best");
+                }
             }
-            //todo check PB and WR
+            BhopRecord wrec = bhpl.getLevel().getLevelRecord();
+            if (wrec == null || wrec == rec)
+                Bukkit.broadcastMessage("New record on " + bhpl.getLevel().getName() + ": " + rec.getTime() + " by " + rec.getName());
         }
         playerExitEvent(bhpl);
     }
 
     public void playerCheckpointEvent(BhopPlayer bhpl, BhopCheckpoint cp) {
+        LOG.info("Bhop player checkpoint event triggered");
         if (bhpl == null || cp == null)
             return;
         if (bhpl.addCheckpoint(cp))
@@ -360,6 +373,9 @@ public class Engine extends JavaPlugin {
     }
 
     private void saveLevel(BhopLevel level) {
+        if (!level.isChanged())
+            return;
+        LOG.info("Saving changes in level " + level.getName());
         try {
             YamlConfiguration levelCfg = new YamlConfiguration();
             levelCfg.set("world", level.getStartPosition().getWorld().getName());
@@ -384,16 +400,14 @@ public class Engine extends JavaPlugin {
             }
             levelCfg.set("leaderboard", csHs);
             levelCfg.save(LEVELS_PATH + level.getName() + YAML_EXTENSION);
-            LOG.info("Saved level " + level.getName());
         } catch (Exception e) {
             LOG.warning("Unable to save level " + level.getName());
         }
     }
 
-    //todo
-    //  save records
-
     //todo:
     //  create arenas from game
     //  regions / boundings
+
+    //todo: permissions + plugin.yml
 }
