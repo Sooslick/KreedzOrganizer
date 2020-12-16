@@ -10,20 +10,26 @@ import org.bukkit.inventory.PlayerInventory;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 public class InventoryUtil {
+
+    private static final SimpleDateFormat sdf = new SimpleDateFormat("yyMMddHHmmssSSS");
 
     public static boolean invToFile(Player p) {
         Bukkit.getLogger().info("saving inventory of player " + p.getName());
         //store inv contents to file
         File f = new File(Engine.INVENTORY_PATH + p.getName() + Engine.YAML_EXTENSION);
+        File backup = new File(Engine.INVENTORY_BACKUP_PATH + sdf.format(new Date()) + p.getName() + Engine.YAML_EXTENSION);
         YamlConfiguration yaml = new YamlConfiguration();
         PlayerInventory inv = p.getInventory();
         yaml.set("inventory.content", inv.getContents());
         //try to save file
         try {
             yaml.save(f);
+            yaml.save(backup);
         } catch (IOException e) {
             return false;
         }

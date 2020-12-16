@@ -24,8 +24,10 @@ public class Engine extends JavaPlugin {
 
     public static final String CFG_FILENAME = "config.yml";
     public static final String CFG_DEFAULT_LEVEL = "defaultLevel.yml";
+    public static final String CFG_LEADERBOARDS = "leaderboards.yml";
     public static final String CFG_LEVELS = "levels";
     public static final String CFG_INVENTORY = "inventory";
+    public static final String CFG_BACKUP = "Backup";
     public static final String YAML_EXTENSION = ".yml";
 
     public static Logger LOG;
@@ -35,6 +37,7 @@ public class Engine extends JavaPlugin {
     private static String LEVELS_DIR;
     private static String LEVELS_PATH;
     public static String INVENTORY_PATH;
+    public static String INVENTORY_BACKUP_PATH;
 
     private FileConfiguration cfg;
     private List<BhopLevel> levels;
@@ -60,6 +63,7 @@ public class Engine extends JavaPlugin {
         LEVELS_DIR = DATA_FOLDER_PATH + CFG_LEVELS;
         LEVELS_PATH = LEVELS_DIR + File.separator;
         INVENTORY_PATH = DATA_FOLDER_PATH + CFG_INVENTORY + File.separator;
+        INVENTORY_BACKUP_PATH = DATA_FOLDER_PATH + CFG_INVENTORY + CFG_BACKUP + File.separator;
         reload();
 
         //todo: should me refactor listeners to reload()?
@@ -211,8 +215,8 @@ public class Engine extends JavaPlugin {
                 }
             }
             BhopRecord wrec = bhpl.getLevel().getLevelRecord();
-            if (wrec == null || wrec == rec)
-                Bukkit.broadcastMessage("New record on " + bhpl.getLevel().getName() + ": " + rec.getTime() + " by " + rec.getName());
+            if (wrec == rec && wrec.getTime() == bhpl.getTimer())
+                Bukkit.broadcastMessage("§eNew record on " + bhpl.getLevel().getName() + ": " + rec.getTime() + " by " + rec.getName());
         }
         playerExitEvent(bhpl);
     }
@@ -334,14 +338,6 @@ public class Engine extends JavaPlugin {
                     }
                 }
 
-                //read level's leaderboard
-                ConfigurationSection csRecords = csParams.getConfigurationSection("leaderboard");
-                if (csRecords != null) {
-                    for (String recHolder : csRecords.getKeys(false)) {
-                        bhopLevel.addRecord(new BhopRecord(recHolder, csRecords.getInt(recHolder)));
-                    }
-                }
-
                 //save level
                 levels.add(bhopLevel);
             } catch (Exception e) {
@@ -351,9 +347,29 @@ public class Engine extends JavaPlugin {
             }
         }
         LOG.info("Loaded " + levels.size() + " Bhop levels");
+
+        //read leaderboards
+        YamlConfiguration csRecords = new YamlConfiguration();
+        File f = new File(DATA_FOLDER_PATH + CFG_LEADERBOARDS);
+        if (f.exists()) {
+            try {
+                csRecords.load(DATA_FOLDER_PATH + CFG_LEADERBOARDS);
+                for (BhopLevel bhl : levels) {
+                    ConfigurationSection csLevelRecs = csRecords.getConfigurationSection(bhl.getName());
+                    for (String name : csLevelRecs.getKeys(false)) {
+                        bhl.addRecord(new BhopRecord(name, csLevelRecs.getInt(name)));
+                    }
+                }
+            } catch (Exception e) {
+                LOG.warning("Unable to read leaderboards");
+            }
+        } else {
+            LOG.info("Leaderboards.yml is not exists, skipped");
+        }
     }
 
     private void saveAll() {
+        saveLeaderboards();
         levels.forEach(this::saveLevel);
         saveCfg();
         //todo: restore players
@@ -402,6 +418,23 @@ public class Engine extends JavaPlugin {
             levelCfg.save(LEVELS_PATH + level.getName() + YAML_EXTENSION);
         } catch (Exception e) {
             LOG.warning("Unable to save level " + level.getName());
+        }
+    }
+
+    private void saveLeaderboards() {
+        YamlConfiguration csLeaders = new YamlConfiguration();
+        for (BhopLevel bhl : levels) {
+            ConfigurationSection csLevel = new YamlConfiguration();
+            for (BhopRecord rec : bhl.getRecords()) {
+                csLevel.set(rec.getName(), rec.getTime());
+            }
+            csLeaders.set(bhl.getName(), csLevel);
+        }
+        try {
+            csLeaders.save(DATA_FOLDER_PATH + CFG_LEADERBOARDS);
+            LOG.info("Saved leaderboards");
+        } catch (Exception e) {
+            LOG.warning("Unable to save leaderboards");
         }
     }
 

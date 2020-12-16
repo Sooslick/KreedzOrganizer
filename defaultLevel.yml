@@ -9,9 +9,6 @@ checkpoints:
   test1:
     triggerType: interact
     triggerLocation: 3, 3, 3
-    loadLocation: 3, 3, 3
+    loadLocation: 3, 3, 3, 90, 45
   test2:
     loadLocation: 5, 5, 5
-leaderboard:
-  ya_soos: 123
-  randomDude: 333
