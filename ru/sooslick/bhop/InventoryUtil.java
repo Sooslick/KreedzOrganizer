@@ -31,11 +31,12 @@ public class InventoryUtil {
             yaml.save(f);
             yaml.save(backup);
         } catch (IOException e) {
+            f.delete();
             return false;
         }
         //clear inventory and put food iin success case
         inv.clear();
-        ItemStack is = new ItemStack(Material.GOLDEN_CARROT, 64);
+        ItemStack is = new ItemStack(Material.GOLDEN_CARROT, 4);
         inv.addItem(is);
         return true;
     }

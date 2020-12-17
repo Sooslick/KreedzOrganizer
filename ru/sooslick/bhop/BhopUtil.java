@@ -15,6 +15,13 @@ public class BhopUtil {
                 Double.parseDouble(coords[0]),
                 Double.parseDouble(coords[1]),
                 Double.parseDouble(coords[2]));
+        else if (coords.length == 4)
+            return new Location(null,
+                    Double.parseDouble(coords[0]),
+                    Double.parseDouble(coords[1]),
+                    Double.parseDouble(coords[2]),
+                    Float.parseFloat(coords[3]),
+                    0);
         else if (coords.length == 5)
             return new Location(null,
                     Double.parseDouble(coords[0]),
@@ -35,7 +42,8 @@ public class BhopUtil {
     }
 
     public static String locationToString(Location l) {
-        return l.getBlockX() + COMMA + l.getBlockY() + COMMA + l.getBlockZ();
+        return l.getBlockX() + COMMA + l.getBlockY() + COMMA + l.getBlockZ() + COMMA
+                + l.getYaw() + COMMA + l.getPitch();
     }
 
     public static boolean isInside(Location l, Location bound1, Location bound2) {

@@ -45,7 +45,7 @@ public class Engine extends JavaPlugin {
     private List<BhopPlayer> dcPlayers;
     private int bhopTimerId = 0;
 
-    //todo: concurrent mod
+    //todo: concurrent mod on flee
     private Runnable bhopTimerProcessor = () -> {
         for (BhopPlayer bhpl : activePlayers) {
             bhpl.tick();

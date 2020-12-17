@@ -40,7 +40,6 @@ public class EventListener implements Listener {
 
     @EventHandler
     public void onMove(PlayerMoveEvent e) {
-        //todo: load test
         if (e.getTo() == null)
             return;
         checkTrigger(e.getPlayer(), e.getTo().getBlock(), TriggerType.MOVEMENT);
@@ -194,8 +193,6 @@ public class EventListener implements Listener {
     private void checkTrigger(Player p, Block b, TriggerType type) {
         if (engine.getActivePlayersCount() == 0)
             return;
-
-        //todo check gamemode, allow only survival and adventure
         BhopPlayer bhpl = engine.getBhopPlayer(p);
         if (bhpl == null)
             return;
@@ -218,7 +215,5 @@ public class EventListener implements Listener {
     private double calcExplosionRadius(Location center, List<Block> bs) {
         return bs.stream().map(b -> BhopUtil.distance(center, b.getLocation())).max(Double::compareTo).orElse(0d);
     }
-
-    //todo onJoin: restore inv from file (failover check)
 
 }
