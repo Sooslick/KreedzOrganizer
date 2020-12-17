@@ -25,6 +25,7 @@ public class CommandListener implements CommandExecutor {
     private static final String LEVEL_REQUIRED = "§cLevel name required.";
     private static final String LEVEL_STARTED = "§eLevel %s started";
     private static final String NOT_PLAYING = "§cYou are not in-game";
+    private static final String NO_PERMISSION = "§cYou have not permissions";
 
     public CommandListener(Engine engine) {
         this.engine = engine;
@@ -38,6 +39,8 @@ public class CommandListener implements CommandExecutor {
                 //console can't play bhop
                 if (!(sender instanceof Player))
                     return sendMessageAndReturn(sender, CONSOLE_CANNOT_BHOP);
+                if (!sender.hasPermission(BhopPermissions.GAMEPLAY))
+                    return sendMessageAndReturn(sender, NO_PERMISSION);
                 Player player = (Player) sender;
                 //check level
                 if (args.length == 1) {
@@ -58,6 +61,8 @@ public class CommandListener implements CommandExecutor {
                 //console can't play bhop
                 if (!(sender instanceof Player))
                     return sendMessageAndReturn(sender, CONSOLE_CANNOT_BHOP);
+                if (!sender.hasPermission(BhopPermissions.GAMEPLAY))
+                    return sendMessageAndReturn(sender, NO_PERMISSION);
                 //check player
                 BhopPlayer bhpl = engine.getBhopPlayer((Player) sender);
                 if (bhpl == null)
@@ -80,6 +85,8 @@ public class CommandListener implements CommandExecutor {
                 //console can't play bhop
                 if (!(sender instanceof Player))
                     return sendMessageAndReturn(sender, CONSOLE_CANNOT_BHOP);
+                if (!sender.hasPermission(BhopPermissions.GAMEPLAY))
+                    return sendMessageAndReturn(sender, NO_PERMISSION);
                 //check player
                 bhpl = engine.getBhopPlayer((Player) sender);
                 if (bhpl == null)
@@ -90,6 +97,8 @@ public class CommandListener implements CommandExecutor {
                 //console can't play bhop
                 if (!(sender instanceof Player))
                     return sendMessageAndReturn(sender, CONSOLE_CANNOT_BHOP);
+                if (!sender.hasPermission(BhopPermissions.GAMEPLAY))
+                    return sendMessageAndReturn(sender, NO_PERMISSION);
                 //get bhop player from dc
                 bhpl = engine.getDcPlayer((Player) sender);
                 if (bhpl == null)

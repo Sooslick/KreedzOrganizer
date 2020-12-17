@@ -106,7 +106,13 @@ public class BhopLevel {
         return edit;
     }
 
+    //todo: CHECK WORLD
     public boolean isInside(Location l) {
         return BhopUtil.isInside(l, bound1, bound2);
+    }
+
+    //TODO: CHECK WORLD
+    public double distanceToLevel(Location l) {
+        return BhopUtil.distanceBetween(l, bound1, bound2);
     }
 }

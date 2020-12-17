@@ -1,15 +1,17 @@
 package ru.sooslick.bhop;
 
 import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
@@ -20,6 +22,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 
 import java.io.File;
+import java.util.List;
 
 public class EventListener implements Listener {
 
@@ -118,12 +121,13 @@ public class EventListener implements Listener {
     public void onBlockBreak(BlockBreakEvent e) {
         if (e.isCancelled())
             return;
-        if (e.getPlayer().getGameMode() == GameMode.CREATIVE)
+        if (e.getPlayer().hasPermission(BhopPermissions.BYPASS))
             return;
         //check is block inside any level
         for (BhopLevel level : engine.getBhopLevelList()) {
             if (level.isInside(e.getBlock().getLocation())) {
                 e.setCancelled(true);
+                e.getPlayer().sendMessage("Don't build here");
                 return;
             }
         }
@@ -133,12 +137,13 @@ public class EventListener implements Listener {
     public void onBlockPlace(BlockPlaceEvent e) {
         if (e.isCancelled())
             return;
-        if (e.getPlayer().getGameMode() == GameMode.CREATIVE)
+        if (e.getPlayer().hasPermission(BhopPermissions.BYPASS))
             return;
         //check is block inside any level
         for (BhopLevel level : engine.getBhopLevelList()) {
             if (level.isInside(e.getBlock().getLocation())) {
                 e.setCancelled(true);
+                e.getPlayer().sendMessage("Don't build here");
                 return;
             }
         }
@@ -148,13 +153,10 @@ public class EventListener implements Listener {
     public void onDrop(PlayerDropItemEvent e) {
         if (e.isCancelled())
             return;
-        //check is block inside any level
-        for (BhopLevel level : engine.getBhopLevelList()) {
-            if (level.isInside(e.getPlayer().getLocation())) {
-                e.setCancelled(true);
-                return;
-            }
-        }
+        BhopPlayer bhpl = engine.getBhopPlayer(e.getPlayer());
+        if (bhpl == null)
+            return;
+        e.setCancelled(true);
     }
 
     @EventHandler
@@ -167,6 +169,26 @@ public class EventListener implements Listener {
         if (bhpl == null)
             return;
         e.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onCreeper(EntityExplodeEvent e) {
+        if (e.isCancelled())
+            return;
+        double r = calcExplosionRadius(e.getLocation(), e.blockList());
+        double d = engine.distanceToNearestLevel(e.getLocation());
+        if (d < r)
+            e.blockList().clear();
+    }
+
+    @EventHandler
+    public void onExplosion(BlockExplodeEvent e) {
+        if (e.isCancelled())
+            return;
+        double r = calcExplosionRadius(e.getBlock().getLocation(), e.blockList());
+        double d = engine.distanceToNearestLevel(e.getBlock().getLocation());
+        if (d < r)
+            e.blockList().clear();
     }
 
     private void checkTrigger(Player p, Block b, TriggerType type) {
@@ -191,6 +213,10 @@ public class EventListener implements Listener {
                 return;
             }
         }
+    }
+
+    private double calcExplosionRadius(Location center, List<Block> bs) {
+        return bs.stream().map(b -> BhopUtil.distance(center, b.getLocation())).max(Double::compareTo).orElse(0d);
     }
 
     //todo onJoin: restore inv from file (failover check)

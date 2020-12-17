@@ -5,10 +5,13 @@ author: sooslick
 main: ru.sooslick.bhop.Engine
 commands:
   bhop:
-    description: some bhop commands
+    description: Play or manage bhop levels
     aliases: bh
-    permission: bhop.*
     usage: /bhop <commands>
 permissions:
-  bhop.*:
-    description: a
+  bhop.gameplay:
+    default: true
+    description: grants access to start, load, exit and continue commands
+  bhop.bypass:
+    default: op
+    description: allows to build ignoring levels restrictions

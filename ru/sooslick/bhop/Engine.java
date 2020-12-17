@@ -99,6 +99,10 @@ public class Engine extends JavaPlugin {
         return levels;
     }
 
+    public double distanceToNearestLevel(Location l) {
+        return levels.stream().map(level -> level.distanceToLevel(l)).min(Double::compareTo).orElse(100500d);
+    }
+
     public BhopCheckpoint getBhopCheckpoint(BhopPlayer bhpl, String cpName) {
         if (bhpl == null)
             return null;

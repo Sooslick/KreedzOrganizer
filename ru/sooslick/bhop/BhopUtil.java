@@ -39,24 +39,37 @@ public class BhopUtil {
     }
 
     public static boolean isInside(Location l, Location bound1, Location bound2) {
-        double x1 = bound1.getX();
-        double x2 = bound2.getX();
-        double y1 = bound1.getY();
-        double y2 = bound2.getY();
-        double z1 = bound1.getZ();
-        double z2 = bound2.getZ();
-        if (x2 < x1) swap(x1, x2);
-        if (y2 < y1) swap(y1, y2);
-        if (z2 < z1) swap(z1, z2);
-        return (l.getX() >= x1 && l.getX() <= x2 &&
-                l.getY() >= y1 && l.getY() <= y2 &&
-                l.getZ() >= z1 && l.getZ() <= z2);
+        return (distanceBetween(l, bound1, bound2) == 0);
     }
 
-    //todo: test method
-    public static void swap(Object a, Object b) {
-        Object temp = a;
-        a = b;
-        b = temp;
+    public static double distance(Location a, Location b) {
+        return diag(
+                a.getX() - b.getX(),
+                a.getY() - b.getY(),
+                a.getZ() - b.getZ());
+    }
+
+    public static double distanceBetween(Location l, Location bound1, Location bound2) {
+        return diag(
+                distanceBetween(l.getX(), bound1.getX(), bound2.getX()),
+                distanceBetween(l.getY(), bound1.getY(), bound2.getY()),
+                distanceBetween(l.getZ(), bound1.getZ(), bound2.getZ()));
+    }
+
+    public static double distanceBetween(double src, double x1, double x2) {
+        if (x2 < x1) {
+            double temp = x1;
+            x1 = x2;
+            x2 = temp;
+        }
+        if (src < x1)
+            return x1 - src;
+        else if (src > x2)
+            return src - x2;
+        else return 0;
+    }
+
+    public static double diag(double dx, double dy, double dz) {
+        return Math.sqrt(dx*dx + dy*dy + dz*dz);
     }
 }
