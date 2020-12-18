@@ -1,4 +1,4 @@
-package ru.sooslick.bhop;
+package ru.sooslick.bhop.util;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -7,6 +7,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import ru.sooslick.bhop.Engine;
 
 import java.io.File;
 import java.io.IOException;

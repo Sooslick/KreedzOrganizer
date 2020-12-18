@@ -9,6 +9,9 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import ru.sooslick.bhop.exception.WorldGuardException;
+import ru.sooslick.bhop.util.BhopUtil;
+import ru.sooslick.bhop.util.InventoryUtil;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -28,6 +31,7 @@ public class Engine extends JavaPlugin {
     public static final String CFG_LEVELS = "levels";
     public static final String CFG_INVENTORY = "inventory";
     public static final String CFG_BACKUP = "Backup";
+    public static final String CFG_USEWG = "useWorldGuardRegions";
     public static final String YAML_EXTENSION = ".yml";
 
     public static Logger LOG;
@@ -44,6 +48,7 @@ public class Engine extends JavaPlugin {
     private List<BhopPlayer> activePlayers;
     private List<BhopPlayer> dcPlayers;
     private int bhopTimerId = 0;
+    private boolean useWg = false;
 
     private Runnable bhopTimerProcessor = () -> {
         for (BhopPlayer bhpl : activePlayers.toArray(new BhopPlayer[0])) {
@@ -307,7 +312,8 @@ public class Engine extends JavaPlugin {
         //load and read config
         //todo: refactor to Cfg class
         cfg = getConfig();
-        List<?> csLevels = cfg.getList("levels");
+        useWg = cfg.getBoolean(CFG_USEWG, false);
+        List<?> csLevels = cfg.getList(CFG_LEVELS);
         levels = new ArrayList<>();
         for (Object obj : csLevels) {
             String levelName = (String) obj;
@@ -321,9 +327,21 @@ public class Engine extends JavaPlugin {
                 csParams.load(LEVELS_PATH + levelName + YAML_EXTENSION);
                 BhopLevel bhopLevel = new BhopLevel(levelName);
                 World w = Bukkit.getWorld(csParams.getString("world"));
-                bhopLevel.setBounds(
-                        BhopUtil.stringToLocation(w, csParams.getString("bound1")),
-                        BhopUtil.stringToLocation(w, csParams.getString("bound2")));
+                //todo terrible region assignment, rework section
+                boolean rgSuccess = false;
+                if (useWg) {
+                    try {
+                        rgSuccess = bhopLevel.setRegion(w, csParams.getString("region"));
+                    } catch (WorldGuardException e) {
+                        LOG.warning("Disabled World Guard integration");
+                        useWg = false;
+                    }
+                }
+                if (!rgSuccess) {
+                    bhopLevel.setBounds(
+                            BhopUtil.stringToLocation(w, csParams.getString("bound1")),
+                            BhopUtil.stringToLocation(w, csParams.getString("bound2")));
+                }
                 bhopLevel.setStart(BhopUtil.stringToLocation(w, csParams.getString("start")));
                 bhopLevel.setFinish(BhopUtil.stringToLocation(w, csParams.getString("finish")));
                 bhopLevel.setTriggerType(TriggerType.valueOf(csParams.getString("triggerType").toUpperCase()));
@@ -391,6 +409,7 @@ public class Engine extends JavaPlugin {
         levels.forEach(level -> levelNames.add(level.getName()));
         try {
             FileConfiguration mainCfg = new YamlConfiguration();
+            mainCfg.set(CFG_USEWG, useWg);
             mainCfg.set(CFG_LEVELS, levelNames);
             mainCfg.save(DATA_FOLDER_PATH + CFG_FILENAME);
             LOG.info("Saved config");
@@ -452,4 +471,6 @@ public class Engine extends JavaPlugin {
     //todo:
     //  create arenas from game
     //  regions / boundings
+    //  separate listeners: gameplay / antigriefing
+    //  cfg field: enableDefaultAntigriefing
 }

@@ -3,6 +3,9 @@ version: 0.2
 description: bhop
 author: sooslick
 main: ru.sooslick.bhop.Engine
+softdepend:
+  - WorldEdit
+  - WorldGuard
 commands:
   bhop:
     description: Play or manage bhop levels

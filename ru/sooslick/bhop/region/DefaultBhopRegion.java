@@ -1,12 +1,12 @@
-package ru.sooslick.bhop;
+package ru.sooslick.bhop.region;
 
 import org.bukkit.Location;
 
-public class BhopRegion {
+public class DefaultBhopRegion implements BhopRegion {
     private Location bound1;
     private Location bound2;
 
-    public BhopRegion(Location l1, Location l2) {
+    public DefaultBhopRegion(Location l1, Location l2) {
         bound1 = l1;
         bound2 = l2;
     }

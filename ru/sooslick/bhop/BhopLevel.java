@@ -1,7 +1,13 @@
 package ru.sooslick.bhop;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
+import ru.sooslick.bhop.exception.WorldGuardException;
+import ru.sooslick.bhop.region.BhopRegion;
+import ru.sooslick.bhop.region.DefaultBhopRegion;
+import ru.sooslick.bhop.region.WorldGuardRegion;
+import ru.sooslick.bhop.util.BhopUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +17,6 @@ public class BhopLevel {
     private final String name;
     private final List<BhopCheckpoint> checkpoints;
     private final List<BhopRecord> records;
-    //private ... region
     private BhopRegion bounds;
     private Location start;
     private Location finish;
@@ -27,8 +32,25 @@ public class BhopLevel {
         edit = false;
     }
 
+    // todo awful method. Just rework
+    public boolean setRegion(World world, String rgName) throws WorldGuardException {
+        //try to assign WG region
+        try {
+            bounds = new WorldGuardRegion(world, rgName);
+            return true;
+        } catch (WorldGuardException e) {
+            // class def error - world guard not exists or not loaded
+            throw e;
+        } catch (Exception e) {
+            // another exceptions, especially rg not found
+            Bukkit.getLogger().warning("Cannot assign region to bhop level " + name + ", region - " + rgName
+            + "\n" + e.getMessage());
+            return false;
+        }
+    }
+
     public void setBounds(Location l1, Location l2) {
-        bounds = new BhopRegion(l1, l2);
+        bounds = new DefaultBhopRegion(l1, l2);
     }
 
     public BhopRegion getBhopRegion() {
@@ -99,6 +121,7 @@ public class BhopLevel {
         return edit;
     }
 
+    //todo: declare isInside in BhopRegion and implement in classes
     public boolean isInside(Location l) {
         return BhopUtil.isInside(l, bounds.getBound1(), bounds.getBound2());
     }

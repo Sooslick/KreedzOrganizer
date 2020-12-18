@@ -1,4 +1,4 @@
-package ru.sooslick.bhop;
+package ru.sooslick.bhop.util;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
