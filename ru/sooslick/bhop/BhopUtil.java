@@ -6,6 +6,7 @@ import org.bukkit.World;
 
 public class BhopUtil {
 
+    public static final double MAXD = 100500d;
     private static final String COMMA = ",";
 
     public static Location stringToLocation(String s) {
@@ -51,6 +52,8 @@ public class BhopUtil {
     }
 
     public static double distance(Location a, Location b) {
+        if (!a.getWorld().equals(b.getWorld()))
+            return MAXD;
         return diag(
                 a.getX() - b.getX(),
                 a.getY() - b.getY(),
@@ -58,6 +61,8 @@ public class BhopUtil {
     }
 
     public static double distanceBetween(Location l, Location bound1, Location bound2) {
+        if (!l.getWorld().equals(bound1.getWorld()))
+            return MAXD;
         return diag(
                 distanceBetween(l.getX(), bound1.getX(), bound2.getX()),
                 distanceBetween(l.getY(), bound1.getY(), bound2.getY()),

@@ -100,7 +100,7 @@ public class Engine extends JavaPlugin {
     }
 
     public double distanceToNearestLevel(Location l) {
-        return levels.stream().map(level -> level.distanceToLevel(l)).min(Double::compareTo).orElse(100500d);
+        return levels.stream().map(level -> level.distanceToLevel(l)).min(Double::compareTo).orElse(BhopUtil.MAXD);
     }
 
     public BhopCheckpoint getBhopCheckpoint(BhopPlayer bhpl, String cpName) {
@@ -400,8 +400,8 @@ public class Engine extends JavaPlugin {
             YamlConfiguration levelCfg = new YamlConfiguration();
             levelCfg.set("world", level.getStartPosition().getWorld().getName());
 //            levelCfg.set("region", level.getRegion());    //todo region
-            levelCfg.set("bound1", BhopUtil.locationToString(level.getBound1()));
-            levelCfg.set("bound2", BhopUtil.locationToString(level.getBound2()));
+            levelCfg.set("bound1", BhopUtil.locationToString(level.getBhopRegion().getBound1()));
+            levelCfg.set("bound2", BhopUtil.locationToString(level.getBhopRegion().getBound2()));
             levelCfg.set("start", BhopUtil.locationToString(level.getStartPosition()));
             levelCfg.set("finish", BhopUtil.locationToString(level.getFinish()));
             levelCfg.set("triggerType", level.getTriggerType().toString());

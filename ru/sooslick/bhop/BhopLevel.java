@@ -12,8 +12,7 @@ public class BhopLevel {
     private final List<BhopCheckpoint> checkpoints;
     private final List<BhopRecord> records;
     //private ... region
-    private Location bound1;
-    private Location bound2;
+    private BhopRegion bounds;
     private Location start;
     private Location finish;
     private TriggerType triggerType;
@@ -29,21 +28,15 @@ public class BhopLevel {
     }
 
     public void setBounds(Location l1, Location l2) {
-        bound1 = l1;
-        bound2 = l2;
+        bounds = new BhopRegion(l1, l2);
     }
 
-    //todo mne ne nrav get bound 1 + 2...
-    public Location getBound1() {
-        return bound1;
-    }
-
-    public Location getBound2() {
-        return bound2;
+    public BhopRegion getBhopRegion() {
+        return bounds;
     }
 
     public World getWorld() {
-        return bound1.getWorld();
+        return bounds.getBound1().getWorld();
     }
 
     public void setStart(Location start) {
@@ -106,13 +99,11 @@ public class BhopLevel {
         return edit;
     }
 
-    //todo: CHECK WORLD
     public boolean isInside(Location l) {
-        return BhopUtil.isInside(l, bound1, bound2);
+        return BhopUtil.isInside(l, bounds.getBound1(), bounds.getBound2());
     }
 
-    //TODO: CHECK WORLD
     public double distanceToLevel(Location l) {
-        return BhopUtil.distanceBetween(l, bound1, bound2);
+        return BhopUtil.distanceBetween(l, bounds.getBound1(), bounds.getBound2());
     }
 }
