@@ -45,9 +45,8 @@ public class Engine extends JavaPlugin {
     private List<BhopPlayer> dcPlayers;
     private int bhopTimerId = 0;
 
-    //todo: concurrent mod on flee
     private Runnable bhopTimerProcessor = () -> {
-        for (BhopPlayer bhpl : activePlayers) {
+        for (BhopPlayer bhpl : activePlayers.toArray(new BhopPlayer[0])) {
             bhpl.tick();
         }
     };
@@ -65,14 +64,13 @@ public class Engine extends JavaPlugin {
         INVENTORY_PATH = DATA_FOLDER_PATH + CFG_INVENTORY + File.separator;
         INVENTORY_BACKUP_PATH = DATA_FOLDER_PATH + CFG_INVENTORY + CFG_BACKUP + File.separator;
         reload();
+        //todo: impl reload command to reinit listeners and activePlayers / dcPlayers
 
-        //todo: should me refactor listeners to reload()?
         //init listeners;
         getServer().getPluginManager().registerEvents(new EventListener(this), this);
-        getCommand("bhop").setExecutor(new CommandListener(this));        //todo plugin.yml
+        getCommand("bhop").setExecutor(new CommandListener(this));
 
         //init other variables
-        //todo: reload don't reload this lists
         activePlayers = new ArrayList<>();
         dcPlayers = new ArrayList<>();
     }
@@ -125,18 +123,22 @@ public class Engine extends JavaPlugin {
             LOG.info("Player restarted level");
             activeBhpl.restart(bhl);
         } else {
+            //try to save inventory and cancel start in fail case
+            if (!InventoryUtil.invToFile(p)) {
+                LOG.warning("Cannot save player inventory, start event cancelled. Player: " + p.getName());
+                p.sendMessage("§cOops, something went wrong. Can't start game");
+                return;
+            }
             //create new BhopPlayer and prepare him
             activeBhpl = new BhopPlayer(p, bhl);
             activePlayers.add(activeBhpl);
-            //todo check result and cancel start if fail
-            InventoryUtil.invToFile(p);
         }
         p.teleport(bhl.getStartPosition());
 
         //check gamemode
         if (p.getGameMode() == GameMode.SPECTATOR)
             p.setGameMode(GameMode.ADVENTURE);
-        else if (p.getGameMode() != GameMode.SURVIVAL)
+        else if (p.getGameMode() != GameMode.SURVIVAL && p.getGameMode() != GameMode.ADVENTURE)
             //todo: more cheats checks: ingame gamemodes, teleports, commands, etc admin features
             activeBhpl.enableCheats();
 
@@ -163,11 +165,15 @@ public class Engine extends JavaPlugin {
             return;
         if (!dcPlayers.contains(bhpl))
             return;
+        Player p = bhpl.getPlayer();
+        if (!InventoryUtil.invToFile(p)) {
+            LOG.warning("Cannot save player inventory, rejoin event cancelled. Player: " + p.getName());
+            p.sendMessage("§cOops, something went wrong. Can't continue game");
+            return;
+        }
         dcPlayers.remove(bhpl);
         // a lot of code duplications, todo ref
         activePlayers.add(bhpl);
-        //todo check result and cancel start if fail
-        InventoryUtil.invToFile(bhpl.getPlayer());
         bhpl.getPlayer().teleport(bhpl.getDcLocation());
         //launch timer if not exists
         if (bhopTimerId == 0) {
@@ -195,9 +201,11 @@ public class Engine extends JavaPlugin {
             bhopTimerId = 0;
         }
 
-        //todo check result and ALARM if fail
         Player p = bhpl.getPlayer();
-        InventoryUtil.invFromFile(p);
+        if (!InventoryUtil.invFromFile(p)) {
+            LOG.warning("Cannot restore player's inventory, player: " + p.getName());
+            p.sendMessage("§cOops, something went wrong. Can't restore your inventory, please contact server admin");
+        }
         p.teleport(bhpl.getComebackLocation());
     }
 
@@ -376,7 +384,6 @@ public class Engine extends JavaPlugin {
         saveLeaderboards();
         levels.forEach(this::saveLevel);
         saveCfg();
-        //todo: restore players
     }
 
     private void saveCfg() {
@@ -445,6 +452,4 @@ public class Engine extends JavaPlugin {
     //todo:
     //  create arenas from game
     //  regions / boundings
-
-    //todo: permissions + plugin.yml
 }

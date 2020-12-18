@@ -101,14 +101,17 @@ public class EventListener implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
         //restore inv if inv file exists
+        Player p = e.getPlayer();
         File f = new File(Engine.INVENTORY_PATH + e.getPlayer().getName() + Engine.YAML_EXTENSION);
         if (f.exists()) {
-            InventoryUtil.invFromFile(e.getPlayer());
+            if (!InventoryUtil.invFromFile(p)) {
+                Bukkit.getLogger().warning("Cannot restore player's inventory, player: " + p.getName());
+                p.sendMessage("§cOops, something went wrong. Can't restore your inventory, please contact server admin");
+            }
             Bukkit.getLogger().info("Restored inventory of player " + e.getPlayer().getName());
         }
 
         //check dc
-        Player p = e.getPlayer();
         BhopPlayer bhpl = engine.getDcPlayer(p);
         if (bhpl == null)
             return;
