@@ -1,6 +1,7 @@
 package ru.sooslick.bhop.region;
 
 import org.bukkit.Location;
+import ru.sooslick.bhop.util.BhopUtil;
 
 public class DefaultBhopRegion implements BhopRegion {
     private Location bound1;
@@ -17,5 +18,9 @@ public class DefaultBhopRegion implements BhopRegion {
 
     public Location getBound2() {
         return bound2;
+    }
+
+    public boolean isInside(Location l) {
+        return BhopUtil.isInside(l, bound1, bound2);
     }
 }

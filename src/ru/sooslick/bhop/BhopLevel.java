@@ -23,8 +23,6 @@ public class BhopLevel {
     private TriggerType triggerType;
     private boolean edit;
 
-    //todo: worldguard region and other data
-
     public BhopLevel(String name) {
         this.name = name;
         checkpoints = new ArrayList<>();
@@ -121,9 +119,8 @@ public class BhopLevel {
         return edit;
     }
 
-    //todo: declare isInside in BhopRegion and implement in classes
     public boolean isInside(Location l) {
-        return BhopUtil.isInside(l, bounds.getBound1(), bounds.getBound2());
+        return bounds.isInside(l);
     }
 
     public double distanceToLevel(Location l) {

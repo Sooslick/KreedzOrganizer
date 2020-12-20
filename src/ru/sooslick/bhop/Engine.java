@@ -10,6 +10,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import ru.sooslick.bhop.exception.WorldGuardException;
+import ru.sooslick.bhop.region.WorldGuardRegion;
 import ru.sooslick.bhop.util.BhopUtil;
 import ru.sooslick.bhop.util.InventoryUtil;
 
@@ -328,6 +329,7 @@ public class Engine extends JavaPlugin {
                 BhopLevel bhopLevel = new BhopLevel(levelName);
                 World w = Bukkit.getWorld(csParams.getString("world"));
                 //todo terrible region assignment, rework section
+                //todo implement world guard holder to check region changes
                 boolean rgSuccess = false;
                 if (useWg) {
                     try {
@@ -425,7 +427,8 @@ public class Engine extends JavaPlugin {
         try {
             YamlConfiguration levelCfg = new YamlConfiguration();
             levelCfg.set("world", level.getStartPosition().getWorld().getName());
-//            levelCfg.set("region", level.getRegion());    //todo region
+            if (level.getBhopRegion() instanceof WorldGuardRegion)
+                levelCfg.set("region", ((WorldGuardRegion) level.getBhopRegion()).getName());
             levelCfg.set("bound1", BhopUtil.locationToString(level.getBhopRegion().getBound1()));
             levelCfg.set("bound2", BhopUtil.locationToString(level.getBhopRegion().getBound2()));
             levelCfg.set("start", BhopUtil.locationToString(level.getStartPosition()));
@@ -470,7 +473,6 @@ public class Engine extends JavaPlugin {
 
     //todo:
     //  create arenas from game
-    //  regions / boundings
     //  separate listeners: gameplay / antigriefing
     //  cfg field: enableDefaultAntigriefing
 }
