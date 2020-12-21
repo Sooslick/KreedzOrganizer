@@ -1,13 +1,17 @@
-package ru.sooslick.bhop;
+package ru.sooslick.bhop.command;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
+import ru.sooslick.bhop.BhopCheckpoint;
+import ru.sooslick.bhop.BhopLevel;
+import ru.sooslick.bhop.BhopPermissions;
+import ru.sooslick.bhop.BhopPlayer;
+import ru.sooslick.bhop.Engine;
 
-public class CommandListener implements CommandExecutor {
-
-    private final Engine engine;
+public class BhopCommandListener implements CommandExecutor {
 
     private static final String COMMAND_START = "start";
     private static final String COMMAND_LOAD = "load";
@@ -27,20 +31,18 @@ public class CommandListener implements CommandExecutor {
     private static final String NOT_PLAYING = "§cYou are not in-game";
     private static final String NO_PERMISSION = "§cYou have not permissions";
 
-    public CommandListener(Engine engine) {
-        this.engine = engine;
-    }
-
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
+        //console can't play bhop
+        if (!(sender instanceof Player))
+            return sendMessageAndReturn(sender, CONSOLE_CANNOT_BHOP);
+        if (!sender.hasPermission(BhopPermissions.GAMEPLAY))
+            return sendMessageAndReturn(sender, NO_PERMISSION);
+        Engine engine = Engine.getInstance();
+        //todo: move engine checks to engine - bhop level exists, sender not console, etc...
         if (args.length == 0)
             return sendMessageAndReturn(sender, command.getUsage());
         switch (args[0].toLowerCase()) {
             case COMMAND_START:
-                //console can't play bhop
-                if (!(sender instanceof Player))
-                    return sendMessageAndReturn(sender, CONSOLE_CANNOT_BHOP);
-                if (!sender.hasPermission(BhopPermissions.GAMEPLAY))
-                    return sendMessageAndReturn(sender, NO_PERMISSION);
                 Player player = (Player) sender;
                 //check level
                 if (args.length == 1) {
@@ -58,11 +60,6 @@ public class CommandListener implements CommandExecutor {
                 engine.playerStartEvent(player, bhl);
                 return sendMessageAndReturn(sender, String.format(LEVEL_STARTED, bhl.getName()));
             case COMMAND_LOAD:
-                //console can't play bhop
-                if (!(sender instanceof Player))
-                    return sendMessageAndReturn(sender, CONSOLE_CANNOT_BHOP);
-                if (!sender.hasPermission(BhopPermissions.GAMEPLAY))
-                    return sendMessageAndReturn(sender, NO_PERMISSION);
                 //check player
                 BhopPlayer bhpl = engine.getBhopPlayer((Player) sender);
                 if (bhpl == null)
@@ -82,11 +79,6 @@ public class CommandListener implements CommandExecutor {
                 engine.playerLoadEvent(bhpl, bhcp);
                 return true;
             case COMMAND_EXIT:
-                //console can't play bhop
-                if (!(sender instanceof Player))
-                    return sendMessageAndReturn(sender, CONSOLE_CANNOT_BHOP);
-                if (!sender.hasPermission(BhopPermissions.GAMEPLAY))
-                    return sendMessageAndReturn(sender, NO_PERMISSION);
                 //check player
                 bhpl = engine.getBhopPlayer((Player) sender);
                 if (bhpl == null)
@@ -94,11 +86,6 @@ public class CommandListener implements CommandExecutor {
                 engine.playerExitEvent(bhpl);
                 return true;
             case COMMAND_CONTINUE:
-                //console can't play bhop
-                if (!(sender instanceof Player))
-                    return sendMessageAndReturn(sender, CONSOLE_CANNOT_BHOP);
-                if (!sender.hasPermission(BhopPermissions.GAMEPLAY))
-                    return sendMessageAndReturn(sender, NO_PERMISSION);
                 //get bhop player from dc
                 bhpl = engine.getDcPlayer((Player) sender);
                 if (bhpl == null)

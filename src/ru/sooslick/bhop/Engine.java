@@ -9,6 +9,8 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import ru.sooslick.bhop.command.BhopCommandListener;
+import ru.sooslick.bhop.command.BhopEditCommandListener;
 import ru.sooslick.bhop.exception.WorldGuardException;
 import ru.sooslick.bhop.region.WorldGuardRegion;
 import ru.sooslick.bhop.util.BhopUtil;
@@ -33,6 +35,8 @@ public class Engine extends JavaPlugin {
     public static final String CFG_INVENTORY = "inventory";
     public static final String CFG_BACKUP = "Backup";
     public static final String CFG_USEWG = "useWorldGuardRegions";
+    public static final String COMMAND_BHOP = "bhop";
+    public static final String COMMAND_BHOPEDIT = "bhopedit";
     public static final String YAML_EXTENSION = ".yml";
 
     public static Logger LOG;
@@ -40,7 +44,7 @@ public class Engine extends JavaPlugin {
 
     private static String DATA_FOLDER_PATH;
     private static String LEVELS_DIR;
-    private static String LEVELS_PATH;
+    public static String LEVELS_PATH;
     public static String INVENTORY_PATH;
     public static String INVENTORY_BACKUP_PATH;
 
@@ -74,7 +78,8 @@ public class Engine extends JavaPlugin {
 
         //init listeners;
         getServer().getPluginManager().registerEvents(new EventListener(this), this);
-        getCommand("bhop").setExecutor(new CommandListener(this));
+        getCommand(COMMAND_BHOP).setExecutor(new BhopCommandListener());
+        getCommand(COMMAND_BHOPEDIT).setExecutor(new BhopEditCommandListener());
 
         //init other variables
         activePlayers = new ArrayList<>();
@@ -87,10 +92,7 @@ public class Engine extends JavaPlugin {
     }
 
     public BhopLevel getBhopLevel(String name) {
-        for (BhopLevel bhl : levels) {
-            if (bhl.getName().equals(name)) return bhl;
-        }
-        return null;
+        return levels.stream().filter(level -> level.getName().equals(name)).findFirst().orElse(null);
     }
 
     public String getBhopLevels() {
@@ -380,6 +382,9 @@ public class Engine extends JavaPlugin {
         }
         LOG.info("Loaded " + levels.size() + " Bhop levels");
 
+        //load bhop admin
+        BhopAdminManager.init();
+
         //read leaderboards
         YamlConfiguration csRecords = new YamlConfiguration();
         File f = new File(DATA_FOLDER_PATH + CFG_LEADERBOARDS);
@@ -468,6 +473,17 @@ public class Engine extends JavaPlugin {
             LOG.info("Saved leaderboards");
         } catch (Exception e) {
             LOG.warning("Unable to save leaderboards");
+        }
+    }
+
+    // ADMIN METHODS
+
+    public void deleteLevel(BhopLevel bhl) {
+        if (levels.remove(bhl)) {
+            if (bhl.getFile().delete())
+                LOG.info("Removed level " + bhl.getName());
+            else
+                LOG.info("Level " + bhl.getName() + " removed, but file was not deleted");
         }
     }
 

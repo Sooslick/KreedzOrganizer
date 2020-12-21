@@ -9,6 +9,7 @@ import ru.sooslick.bhop.region.DefaultBhopRegion;
 import ru.sooslick.bhop.region.WorldGuardRegion;
 import ru.sooslick.bhop.util.BhopUtil;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,6 +29,10 @@ public class BhopLevel {
         checkpoints = new ArrayList<>();
         records = new ArrayList<>();
         edit = false;
+    }
+
+    public File getFile() {
+        return new File(Engine.LEVELS_PATH + name + Engine.YAML_EXTENSION);
     }
 
     // todo awful method. Just rework

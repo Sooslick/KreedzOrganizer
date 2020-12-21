@@ -8,9 +8,13 @@ softdepend:
   - WorldGuard
 commands:
   bhop:
-    description: Play or manage bhop levels
+    description: Play bhop levels
     aliases: bh
     usage: /bhop <commands>
+  bhopedit:
+    description: Manage bhop levels
+    aliases: bhed
+    usage: /bhopedit <commands>
 permissions:
   bhop.gameplay:
     default: true
@@ -18,3 +22,6 @@ permissions:
   bhop.bypass:
     default: op
     description: allows to build ignoring levels restrictions
+  bhop.edit:
+    default: op
+    description: grants access to editor commands
