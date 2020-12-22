@@ -11,10 +11,10 @@ commands:
     description: Play bhop levels
     aliases: bh
     usage: /bhop <commands>
-  bhopedit:
+  bhopmanage:
     description: Manage bhop levels
     aliases: bhed
-    usage: /bhopedit <commands>
+    usage: /bhopmanage <commands>
 permissions:
   bhop.gameplay:
     default: true

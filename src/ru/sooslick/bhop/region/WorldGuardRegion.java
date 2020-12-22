@@ -52,4 +52,12 @@ public class WorldGuardRegion implements BhopRegion {
     public String getName() {
         return region.getId();
     }
+
+    public BhopRegion getCopy() {
+        try {
+            return new WorldGuardRegion(world, region.getId());
+        } catch (Exception e) {
+            return new DefaultBhopRegion(getBound1(), getBound2());
+        }
+    }
 }

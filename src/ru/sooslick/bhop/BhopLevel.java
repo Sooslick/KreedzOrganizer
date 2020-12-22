@@ -56,6 +56,10 @@ public class BhopLevel {
         bounds = new DefaultBhopRegion(l1, l2);
     }
 
+    private void setBhopRegion(BhopRegion rg) {
+        bounds = rg;
+    }
+
     public BhopRegion getBhopRegion() {
         return bounds;
     }
@@ -120,6 +124,10 @@ public class BhopLevel {
         return records.stream().sorted().findFirst().orElse(null);
     }
 
+    public void setChanged() {
+        edit = true;
+    }
+
     public boolean isChanged() {
         return edit;
     }
@@ -130,5 +138,17 @@ public class BhopLevel {
 
     public double distanceToLevel(Location l) {
         return BhopUtil.distanceBetween(l, bounds.getBound1(), bounds.getBound2());
+    }
+
+    @Override
+    public BhopLevel clone() {
+        BhopLevel copy = new BhopLevel(name);
+        copy.setBhopRegion(bounds.getCopy());   //weird wg.
+        copy.setStart(start.clone());
+        copy.setFinish(finish.clone());
+        copy.setTriggerType(triggerType);
+        checkpoints.forEach(cp -> copy.addCheckpoint(cp.clone()));
+        records.forEach(copy::addRecord);   //immutable?
+        return copy;
     }
 }

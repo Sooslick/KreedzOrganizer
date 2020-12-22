@@ -9,12 +9,26 @@ import java.util.stream.Collectors;
 
 public class BhopAdminManager {
     private static List<PendingCommand> pendingCommands;
+    private static List<BhopAdmin> activeAdmins;
 
     //disable constructor
     private BhopAdminManager() {}
 
     public static void init() {
         pendingCommands = new LinkedList<>();
+        activeAdmins = new LinkedList<>();
+    }
+
+    public static void createLevel(CommandSender sender, String levelName) {
+        BhopAdmin admin = getActiveAdmin(sender);
+        if (admin == null) {
+            //no session found, just create level
+            activeAdmins.add(new BhopAdmin(sender, new BhopLevel(levelName)));
+            sender.sendMessage("§eCreated level §6" + levelName + " §e and started edit session");
+            //todo: send status
+            return;
+        }
+        sender.sendMessage("§cYou have an unfinished edit session, use §6/bhopmanage save §cor §6/bhopmanage discard");
     }
 
     public static void deleteLevel(CommandSender sender, BhopLevel bhl) {
@@ -33,6 +47,16 @@ public class BhopAdminManager {
         Engine.getInstance().deleteLevel(bhl);
     }
 
+    public static void editLevel(CommandSender sender, BhopLevel bhl) {
+        BhopAdmin admin = getActiveAdmin(sender);
+        if (admin == null) {
+            activeAdmins.add(new BhopAdmin(sender, bhl.clone()));
+            sender.sendMessage("§eStarted editing §6" + bhl.getName());
+            return;
+        }
+        sender.sendMessage("§cYou have an unfinished edit session, use §6/bhopmanage save §cor §6/bhopmanage discard");
+    }
+
     private static List<PendingCommand> activePendingCommands() {
         //cleanup
         pendingCommands.removeAll(pendingCommands.stream()
@@ -44,6 +68,13 @@ public class BhopAdminManager {
     private static PendingCommand getPendingCommand(CommandSender sender) {
         return activePendingCommands().stream()
                 .filter(pc -> pc.getCommandSender().equals(sender))
+                .findFirst()
+                .orElse(null);
+    }
+
+    private static BhopAdmin getActiveAdmin(CommandSender sender) {
+        return activeAdmins.stream()
+                .filter(admin -> admin.getAdmin().equals(sender))
                 .findFirst()
                 .orElse(null);
     }

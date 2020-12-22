@@ -36,7 +36,7 @@ public class Engine extends JavaPlugin {
     public static final String CFG_BACKUP = "Backup";
     public static final String CFG_USEWG = "useWorldGuardRegions";
     public static final String COMMAND_BHOP = "bhop";
-    public static final String COMMAND_BHOPEDIT = "bhopedit";
+    public static final String COMMAND_BHOPEDIT = "bhopmanage";
     public static final String YAML_EXTENSION = ".yml";
 
     public static Logger LOG;

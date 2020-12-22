@@ -6,4 +6,5 @@ public interface BhopRegion {
     Location getBound1();
     Location getBound2();
     boolean isInside(Location l);
+    BhopRegion getCopy();
 }

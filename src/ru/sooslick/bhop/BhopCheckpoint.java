@@ -32,4 +32,8 @@ public class BhopCheckpoint {
         return name;
     }
 
+    @Override
+    public BhopCheckpoint clone() {
+        return new BhopCheckpoint(name, loadLocation.clone(), triggerLocation.clone(), triggerType);
+    }
 }

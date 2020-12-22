@@ -23,4 +23,8 @@ public class DefaultBhopRegion implements BhopRegion {
     public boolean isInside(Location l) {
         return BhopUtil.isInside(l, bound1, bound2);
     }
+
+    public BhopRegion getCopy() {
+        return new DefaultBhopRegion(bound1.clone(), bound2.clone());
+    }
 }
