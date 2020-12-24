@@ -42,6 +42,7 @@ public class BhopCommandListener implements CommandExecutor {
         if (args.length == 0)
             return sendMessageAndReturn(sender, command.getUsage());
         switch (args[0].toLowerCase()) {
+
             case COMMAND_START:
                 Player player = (Player) sender;
                 //check level
@@ -59,6 +60,7 @@ public class BhopCommandListener implements CommandExecutor {
                 //trigger start event
                 engine.playerStartEvent(player, bhl);
                 return sendMessageAndReturn(sender, String.format(LEVEL_STARTED, bhl.getName()));
+
             case COMMAND_LOAD:
                 //check player
                 BhopPlayer bhpl = engine.getBhopPlayer((Player) sender);
@@ -78,6 +80,7 @@ public class BhopCommandListener implements CommandExecutor {
                 }
                 engine.playerLoadEvent(bhpl, bhcp);
                 return true;
+
             case COMMAND_EXIT:
                 //check player
                 bhpl = engine.getBhopPlayer((Player) sender);
@@ -85,6 +88,7 @@ public class BhopCommandListener implements CommandExecutor {
                     return sendMessageAndReturn(sender, NOT_PLAYING);
                 engine.playerExitEvent(bhpl);
                 return true;
+
             case COMMAND_CONTINUE:
                 //get bhop player from dc
                 bhpl = engine.getDcPlayer((Player) sender);
@@ -93,6 +97,7 @@ public class BhopCommandListener implements CommandExecutor {
                 //then trigger rejoin event
                 engine.playerRejoinEvent(bhpl);
                 return sendMessageAndReturn(sender, GAME_RESTORED);
+
             default:
                 return sendMessageAndReturn(sender, command.getUsage());
         }

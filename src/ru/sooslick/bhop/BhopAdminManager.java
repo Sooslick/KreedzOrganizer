@@ -1,5 +1,6 @@
 package ru.sooslick.bhop;
 
+import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import ru.sooslick.bhop.command.BhopAction;
 
@@ -23,9 +24,10 @@ public class BhopAdminManager {
         BhopAdmin admin = getActiveAdmin(sender);
         if (admin == null) {
             //no session found, just create level
-            activeAdmins.add(new BhopAdmin(sender, new BhopLevel(levelName)));
+            admin = new BhopAdmin(sender, new BhopLevel(levelName), true);
+            activeAdmins.add(admin);
             sender.sendMessage("§eCreated level §6" + levelName + " §e and started edit session");
-            //todo: send status
+            admin.sendStatus();
             return;
         }
         sender.sendMessage("§cYou have an unfinished edit session, use §6/bhopmanage save §cor §6/bhopmanage discard");
@@ -50,11 +52,20 @@ public class BhopAdminManager {
     public static void editLevel(CommandSender sender, BhopLevel bhl) {
         BhopAdmin admin = getActiveAdmin(sender);
         if (admin == null) {
-            activeAdmins.add(new BhopAdmin(sender, bhl.clone()));
+            activeAdmins.add(new BhopAdmin(sender, bhl.clone(), false));
             sender.sendMessage("§eStarted editing §6" + bhl.getName());
             return;
         }
         sender.sendMessage("§cYou have an unfinished edit session, use §6/bhopmanage save §cor §6/bhopmanage discard");
+    }
+
+    public static void setRegion(CommandSender sender, World world, String rgName) {
+        BhopAdmin admin = getActiveAdmin(sender);
+        if (admin == null) {
+            sender.sendMessage("§cYou are not in editing mode. Use Create or Edit command first.");
+            return;
+        }
+        admin.setRegion(world, rgName);
     }
 
     private static List<PendingCommand> activePendingCommands() {
