@@ -6,13 +6,14 @@ import org.bukkit.command.CommandSender;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 public class BhopAdmin {
 
     private final CommandSender admin;
     private final BhopLevel level;
-    private final List<CheckListEntry> checklist;
+    private final Set<CheckListEntry> checklist;
 
     private Location bound1;
     private Location bound2;
@@ -29,9 +30,9 @@ public class BhopAdmin {
         }
         //todo: do not add region in useWg is disabled
         checklist = enableChecklist ?
-                Arrays.asList(CheckListEntry.REGION, CheckListEntry.BOUNDS, CheckListEntry.START,
-                        CheckListEntry.FINISH, CheckListEntry.TRIGGER, CheckListEntry.CHECKPOINTS) :
-                Collections.emptyList();
+                new HashSet<>(Arrays.asList(CheckListEntry.REGION, CheckListEntry.BOUNDS, CheckListEntry.START,
+                        CheckListEntry.FINISH, CheckListEntry.TRIGGER, CheckListEntry.CHECKPOINTS)) :
+                Collections.emptySet();
     }
 
     public CommandSender getAdmin() {
@@ -47,6 +48,14 @@ public class BhopAdmin {
                 sendStatus();
                 bound1 = level.getBhopRegion().getBound1();
                 bound2 = level.getBhopRegion().getBound2();
+
+                //check start/finish
+                if (level.getStartPosition() != null)
+                    if (!level.isInside(level.getStartPosition()))
+                        admin.sendMessage("§cStart location is outside of BhopLevel");
+                if (level.getFinish() != null)
+                    if (!level.isInside(level.getFinish()))
+                        admin.sendMessage("§cFinish location is outside of BhopLevel");
             } else {
                 admin.sendMessage("§cCannot assign region to BhopLevel");
             }
@@ -63,14 +72,53 @@ public class BhopAdmin {
             bound2 = loc;
         }
         if (bound1 != null && bound2 != null) {
+            if (!bound1.getWorld().equals(bound2.getWorld())) {
+                admin.sendMessage("§cBounds are located in different worlds, cannot set bounding");
+                return;
+            }
             level.setBounds(bound1, bound2);
             admin.sendMessage("§eSet bounding for level");
             checklist.remove(CheckListEntry.BOUNDS);
             checklist.remove(CheckListEntry.REGION);
             sendStatus();
+            //check start/finish
+            if (level.getStartPosition() != null)
+                if (!level.isInside(level.getStartPosition()))
+                    admin.sendMessage("§cStart location is outside of BhopLevel");
+            if (level.getFinish() != null)
+                if (!level.isInside(level.getFinish()))
+                    admin.sendMessage("§cFinish location is outside of BhopLevel");
         } else {
             admin.sendMessage("§eNow set the second position of level bounding");
         }
+    }
+
+    public void setStart(Location loc) {
+        //check region
+        if (level.getBhopRegion() != null) {
+            if (!level.getBhopRegion().getBound1().getWorld().equals(loc.getWorld())) {
+                admin.sendMessage("§cBounding are located in different world, cannot set start");
+                return;
+            }
+        }
+        level.setStart(loc);
+        checklist.remove(CheckListEntry.START);
+        admin.sendMessage("§eSet start position for level");
+        sendStatus();
+    }
+
+    public void setFinish(Location loc) {
+        //check region
+        if (level.getBhopRegion() != null) {
+            if (!level.getBhopRegion().getBound1().getWorld().equals(loc.getWorld())) {
+                admin.sendMessage("§cBounding are located in different world, cannot set start");
+                return;
+            }
+        }
+        level.setStart(loc);
+        checklist.remove(CheckListEntry.START);
+        admin.sendMessage("§eSet start position for level");
+        sendStatus();
     }
 
     public void sendStatus() {
@@ -81,6 +129,7 @@ public class BhopAdmin {
         admin.sendMessage(sb.toString());
     }
 
+    //todo rework (and remove?)
     private enum CheckListEntry {
         REGION("Region"),
         BOUNDS("Boundaries"),

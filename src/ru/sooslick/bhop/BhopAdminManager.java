@@ -78,6 +78,24 @@ public class BhopAdminManager {
         admin.setBound(cmd, loc);
     }
 
+    public static void setStart(CommandSender sender, Location loc) {
+        BhopAdmin admin = getActiveAdmin(sender);
+        if (admin == null) {
+            sender.sendMessage("§cYou are not in editing mode. Use Create or Edit command first.");
+            return;
+        }
+        admin.setStart(loc);
+    }
+
+    public static void setFinish(CommandSender sender, Location loc) {
+        BhopAdmin admin = getActiveAdmin(sender);
+        if (admin == null) {
+            sender.sendMessage("§cYou are not in editing mode. Use Create or Edit command first.");
+            return;
+        }
+        admin.setFinish(loc);
+    }
+
     private static List<PendingCommand> activePendingCommands() {
         //cleanup
         pendingCommands.removeAll(pendingCommands.stream()

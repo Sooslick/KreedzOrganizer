@@ -23,6 +23,8 @@ public class BhopEditCommandListener implements CommandExecutor {
     private static final String SET_REGION = "region";
     private static final String SET_BOUND1 = "bound1";
     private static final String SET_BOUND2 = "bound2";
+    private static final String SET_START = "start";
+    private static final String SET_FINISH = "finish";
 
     //todo: same messages in BhopCommandListener
     private static final String NO_PERMISSION = "§cYou have not permissions";
@@ -90,20 +92,33 @@ public class BhopEditCommandListener implements CommandExecutor {
                     case SET_BOUND1:
                     case SET_BOUND2:
                         if (args.length == 2)
-                            return sendMessageAndReturn(sender, "§c/bhop set bound1 [world] [location]");
-                        Location loc = null;
-                        //try to get loc from args
-                        if (args.length > 3)
-                            loc = BhopUtil.stringToLocation(Bukkit.getWorld(args[2]), BhopUtil.join(", ", args, 3));
-                        //else try to get loc from playerpos
-                        else if (sender instanceof Player)
-                            loc = ((Player) sender).getLocation();
+                            return sendMessageAndReturn(sender, "§c/bhop set " + args[1] + " [world] [location]");
+                        Location loc = parseLocation(sender, args);
                         if (loc != null) {
                             BhopAdminManager.setBound(sender, args[1], loc);
                             return true;
                         }
-                        //else notify
-                        return sendMessageAndReturn(sender, "§cPlease specify location of your BhopLevel: §6/bhop set bound1 [world] [location]");
+                        return sendMessageAndReturn(sender, "§cPlease specify location of your BhopLevel: §6/bhop set " + args[1] + " [world] [location]");
+
+                    case SET_START:
+                        if (args.length == 2)
+                            return sendMessageAndReturn(sender, "§c/bhop set start [world] [location]");
+                        loc = parseLocation(sender, args);
+                        if (loc != null) {
+                            BhopAdminManager.setStart(sender, loc);
+                            return true;
+                        }
+                        return sendMessageAndReturn(sender, "§cPlease specify location of your BhopLevel: §6/bhop set start [world] [location]");
+
+                    case SET_FINISH:
+                        if (args.length == 2)
+                            return sendMessageAndReturn(sender, "§c/bhop set finish [world] [location]");
+                        loc = parseLocation(sender, args);
+                        if (loc != null) {
+                            BhopAdminManager.setFinish(sender, loc);
+                            return true;
+                        }
+                        return sendMessageAndReturn(sender, "§cPlease specify location of your BhopLevel: §6/bhop set finish [world] [location]");
 
                     default:
                         return sendMessageAndReturn(sender, "§cParameters: region, bound1, bound2, start, finish, trigger, checkpoint");
@@ -112,6 +127,16 @@ public class BhopEditCommandListener implements CommandExecutor {
             default:
                 return sendMessageAndReturn(sender, command.getUsage());
         }
+    }
+
+    private Location parseLocation(CommandSender sender, String[] args) {
+        //try to get loc from args
+        if (args.length > 3)
+            return BhopUtil.stringToLocation(Bukkit.getWorld(args[2]), BhopUtil.join(", ", args, 3));
+            //else try to get loc from playerpos
+        else if (sender instanceof Player)
+            return ((Player) sender).getLocation();
+        return null;
     }
 
     private boolean sendMessageAndReturn(CommandSender sender, String message) {
