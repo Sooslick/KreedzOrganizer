@@ -1,5 +1,6 @@
 package ru.sooslick.bhop;
 
+import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 
@@ -9,13 +10,23 @@ import java.util.List;
 
 public class BhopAdmin {
 
-    private CommandSender admin;
-    private BhopLevel level;
-    private List<CheckListEntry> checklist;
+    private final CommandSender admin;
+    private final BhopLevel level;
+    private final List<CheckListEntry> checklist;
+
+    private Location bound1;
+    private Location bound2;
 
     public BhopAdmin(CommandSender admin, BhopLevel level, boolean enableChecklist) {
         this.admin = admin;
         this.level = level;
+        if (level == null) {
+            bound1 = null;
+            bound2 = null;
+        } else {
+            bound1 = level.getBhopRegion().getBound1();
+            bound2 = level.getBhopRegion().getBound2();
+        }
         //todo: do not add region in useWg is disabled
         checklist = enableChecklist ?
                 Arrays.asList(CheckListEntry.REGION, CheckListEntry.BOUNDS, CheckListEntry.START,
@@ -30,16 +41,36 @@ public class BhopAdmin {
     public void setRegion(World world, String rgName) {
         try {
             if (level.setRegion(world, rgName)) {
+                admin.sendMessage("§eAssigned region to BhopLevel");
                 checklist.remove(CheckListEntry.REGION);
                 checklist.remove(CheckListEntry.BOUNDS);
-                admin.sendMessage("§eAssigned region to BhopLevel");
+                sendStatus();
+                bound1 = level.getBhopRegion().getBound1();
+                bound2 = level.getBhopRegion().getBound2();
             } else {
                 admin.sendMessage("§cCannot assign region to BhopLevel");
             }
         } catch (Exception e) {
             admin.sendMessage("§cCannot assign region to BhopLevel: " + e.getMessage());
         }
-        sendStatus();
+    }
+
+    public void setBound(String cmd, Location loc) {
+        //totally weird bound1 / bound2 check
+        if (cmd.contains("1")) {
+            bound1 = loc;
+        } else {
+            bound2 = loc;
+        }
+        if (bound1 != null && bound2 != null) {
+            level.setBounds(bound1, bound2);
+            admin.sendMessage("§eSet bounding for level");
+            checklist.remove(CheckListEntry.BOUNDS);
+            checklist.remove(CheckListEntry.REGION);
+            sendStatus();
+        } else {
+            admin.sendMessage("§eNow set the second position of level bounding");
+        }
     }
 
     public void sendStatus() {

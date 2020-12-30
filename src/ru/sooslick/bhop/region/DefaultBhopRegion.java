@@ -4,8 +4,8 @@ import org.bukkit.Location;
 import ru.sooslick.bhop.util.BhopUtil;
 
 public class DefaultBhopRegion implements BhopRegion {
-    private Location bound1;
-    private Location bound2;
+    private final Location bound1;
+    private final Location bound2;
 
     public DefaultBhopRegion(Location l1, Location l2) {
         bound1 = l1;

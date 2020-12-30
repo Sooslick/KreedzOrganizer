@@ -1,6 +1,7 @@
 package ru.sooslick.bhop.command;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -11,6 +12,7 @@ import ru.sooslick.bhop.BhopAdminManager;
 import ru.sooslick.bhop.BhopLevel;
 import ru.sooslick.bhop.BhopPermissions;
 import ru.sooslick.bhop.Engine;
+import ru.sooslick.bhop.util.BhopUtil;
 
 public class BhopEditCommandListener implements CommandExecutor {
     private static final String COMMAND_CREATE = "create";
@@ -19,6 +21,8 @@ public class BhopEditCommandListener implements CommandExecutor {
     private static final String COMMAND_SET = "set";
 
     private static final String SET_REGION = "region";
+    private static final String SET_BOUND1 = "bound1";
+    private static final String SET_BOUND2 = "bound2";
 
     //todo: same messages in BhopCommandListener
     private static final String NO_PERMISSION = "§cYou have not permissions";
@@ -70,15 +74,37 @@ public class BhopEditCommandListener implements CommandExecutor {
                         if (args.length == 2)
                             return sendMessageAndReturn(sender, "§c/bhop set region <world guard region> [world]");
                         World world = null;
+                        //get world from args if specified
                         if (args.length > 3)
                             world = Bukkit.getWorld(args[3]);
+                        //otherwise get world from current player's location
                         else if (sender instanceof Player)
                             world = ((Player) sender).getWorld();
+                        //check is world specified
                         if (world != null) {
                             BhopAdminManager.setRegion(sender, world, args[2]);
                             return true;
                         }
-                        sendMessageAndReturn(sender, "§cPlease specify world of your BhopLevel: §6/bhop set region " + args[2] + " [world]");
+                        return sendMessageAndReturn(sender, "§cPlease specify world of your BhopLevel: §6/bhop set region " + args[2] + " [world]");
+
+                    case SET_BOUND1:
+                    case SET_BOUND2:
+                        if (args.length == 2)
+                            return sendMessageAndReturn(sender, "§c/bhop set bound1 [world] [location]");
+                        Location loc = null;
+                        //try to get loc from args
+                        if (args.length > 3)
+                            loc = BhopUtil.stringToLocation(Bukkit.getWorld(args[2]), BhopUtil.join(", ", args, 3));
+                        //else try to get loc from playerpos
+                        else if (sender instanceof Player)
+                            loc = ((Player) sender).getLocation();
+                        if (loc != null) {
+                            BhopAdminManager.setBound(sender, args[1], loc);
+                            return true;
+                        }
+                        //else notify
+                        return sendMessageAndReturn(sender, "§cPlease specify location of your BhopLevel: §6/bhop set bound1 [world] [location]");
+
                     default:
                         return sendMessageAndReturn(sender, "§cParameters: region, bound1, bound2, start, finish, trigger, checkpoint");
                 }

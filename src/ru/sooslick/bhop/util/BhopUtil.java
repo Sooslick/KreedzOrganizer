@@ -47,6 +47,15 @@ public class BhopUtil {
                 + l.getYaw() + COMMA + l.getPitch();
     }
 
+    public static String join(String delimiter, String[] args, int from) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = from; i < args.length; i++) {
+            sb.append(args[i]);
+            if (i+1 < args.length) sb.append(delimiter);
+        }
+        return sb.toString();
+    }
+
     public static boolean isInside(Location l, Location bound1, Location bound2) {
         return (distanceBetween(l, bound1, bound2) == 0);
     }

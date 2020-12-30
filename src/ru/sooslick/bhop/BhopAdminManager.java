@@ -1,5 +1,6 @@
 package ru.sooslick.bhop;
 
+import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import ru.sooslick.bhop.command.BhopAction;
@@ -66,6 +67,15 @@ public class BhopAdminManager {
             return;
         }
         admin.setRegion(world, rgName);
+    }
+
+    public static void setBound(CommandSender sender, String cmd, Location loc) {
+        BhopAdmin admin = getActiveAdmin(sender);
+        if (admin == null) {
+            sender.sendMessage("§cYou are not in editing mode. Use Create or Edit command first.");
+            return;
+        }
+        admin.setBound(cmd, loc);
     }
 
     private static List<PendingCommand> activePendingCommands() {
