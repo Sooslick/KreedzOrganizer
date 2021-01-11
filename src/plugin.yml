@@ -14,7 +14,7 @@ commands:
   bhopmanage:
     description: Manage bhop levels
     aliases: bhed
-    usage: /bhopmanage <commands>
+    usage: /bhopmanage <commands> <params>
 permissions:
   bhop.gameplay:
     default: true
