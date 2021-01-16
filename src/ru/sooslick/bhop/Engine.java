@@ -121,7 +121,7 @@ public class Engine extends JavaPlugin {
         return bhpl.getCheckpointsSet().contains(bhcp) ? bhcp : null;
     }
 
-    public void playerStartEvent(Player p, BhopLevel bhl) {
+    public BhopPlayer playerStartEvent(Player p, BhopLevel bhl) {
         LOG.info("Bhop player start event triggered");
         //remove player from DC list if presents
         dcPlayers.remove(getDcPlayer(p));
@@ -135,7 +135,7 @@ public class Engine extends JavaPlugin {
             if (!InventoryUtil.invToFile(p)) {
                 LOG.warning("Cannot save player inventory, start event cancelled. Player: " + p.getName());
                 p.sendMessage("§cOops, something went wrong. Can't start game");
-                return;
+                return null;
             }
             //create new BhopPlayer and prepare him
             activeBhpl = new BhopPlayer(p, bhl);
@@ -154,6 +154,9 @@ public class Engine extends JavaPlugin {
         if (bhopTimerId == 0) {
             bhopTimerId = Bukkit.getScheduler().scheduleSyncRepeatingTask(this, bhopTimerProcessor, 1, 20);
         }
+
+        //return player
+        return activeBhpl;
     }
 
     public void playerLoadEvent(BhopPlayer bhpl, BhopCheckpoint cp) {
