@@ -6,12 +6,9 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import ru.sooslick.bhop.BhopCheckpoint;
-import ru.sooslick.bhop.BhopLevel;
-import ru.sooslick.bhop.BhopPermissions;
-import ru.sooslick.bhop.BhopPlayer;
-import ru.sooslick.bhop.Engine;
-import ru.sooslick.bhop.TriggerType;
+import ru.sooslick.bhop.*;
+
+import java.util.stream.Collectors;
 
 public class BhopCommandListener implements CommandExecutor {
 
@@ -21,7 +18,11 @@ public class BhopCommandListener implements CommandExecutor {
     private static final String COMMAND_CONTINUE = "continue";
     private static final String COMMAND_PRACTICE = "practice";
     private static final String COMMAND_SAVE = "save";
-    //todo HELP, LEVELS, CHECKPOINTS, VIEWSTATS
+    private static final String COMMAND_LEVELS = "levels";
+    private static final String COMMAND_CHECKPOINTS = "checkpoints";
+    private static final String COMMAND_LEADERBOARDS = "leaderboard";
+    private static final String COMMAND_STAT = "stat";
+    private static final String COMMAND_HELP = "help";
 
     private static final String AVAILABLE_CHECKPOINTS = "§eAvailable points:";
     private static final String AVAILABLE_LEVELS = "§eAvailable levels:";
@@ -40,12 +41,66 @@ public class BhopCommandListener implements CommandExecutor {
     private static final String USAGE_SAVE = "§c/bhop save <checkpoint name>";
 
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
+        //check common commands aka help, infos, stats...
+        Engine engine = Engine.getInstance();
+        if (args.length > 0) {
+            switch (args[0].toLowerCase()) {
+                case COMMAND_LEVELS:
+                    sendMessageAndReturn(sender, engine.getBhopLevels());
+                case COMMAND_CHECKPOINTS:
+                    //format checkpoints list if level specified
+                    if (args.length > 1) {
+                        BhopLevel bhl = engine.getBhopLevel(args[1]);
+                        if (bhl == null)
+                            return sendMessageAndReturn(sender, "§cAvailable levels: " + engine.getBhopLevels());
+                        else
+                            return sendMessageAndReturn(sender, bhl.getCheckpoints().stream().map(BhopCheckpoint::getName).collect(Collectors.joining()));
+                    }
+                    //format checkpoints list for current player, otherwise prompt for level name
+                    BhopPlayer bhpl = null;
+                    if (sender instanceof Player)
+                        bhpl = engine.getBhopPlayer((Player) sender);
+                    if (bhpl != null)
+                        return sendMessageAndReturn(sender, bhpl.getCheckpoints());
+                    else
+                        return sendMessageAndReturn(sender, "§c/bhop checkpoints <level name>");
+                    
+                case COMMAND_LEADERBOARDS:
+                    if (args.length == 1)
+                        return sendMessageAndReturn(sender, "§c/bhop leaderboards <level name>");
+                    BhopLevel bhl = engine.getBhopLevel(args[1]);
+                    if (bhl == null)
+                        return sendMessageAndReturn(sender, "§cAvailable levels: " + engine.getBhopLevels());
+                    bhl.printLeaderboard(sender);
+                    return true;
+
+                case COMMAND_STAT:
+                    if (args.length == 1)
+                        engine.printPlayerStat(sender, sender.getName());
+                    else
+                        engine.printPlayerStat(sender, args[1]);
+                    return true;
+
+                case COMMAND_HELP:
+                    sender.sendMessage("§6/bhop start <level name>\n" +
+                                    "/bhop load <checkpoint name>\n" +
+                                    "/bhop exit\n" +
+                                    "/bhop practice <level name>\n" +
+                                    "/bhop save <checkpoint name>\n" +
+                                    "/bhop levels\n" +
+                                    "/bhop checkpoints\n" +
+                                    "/bhop leaderboard <level name>\n" +
+                                    "/bhop stat [player]\n"
+                    );
+                    return true;
+            }
+        }
+
         //console can't play bhop
         if (!(sender instanceof Player))
             return sendMessageAndReturn(sender, CONSOLE_CANNOT_BHOP);
         if (!sender.hasPermission(BhopPermissions.GAMEPLAY))
             return sendMessageAndReturn(sender, NO_PERMISSION);
-        Engine engine = Engine.getInstance();
         //todo: move engine checks to engine - bhop level exists, sender not console, etc...
         if (args.length == 0)
             return sendMessageAndReturn(sender, command.getUsage());

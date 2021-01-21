@@ -5,6 +5,7 @@ import org.bukkit.entity.Player;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class BhopPlayer {
 
@@ -55,9 +56,7 @@ public class BhopPlayer {
     }
 
     public String getCheckpoints() {
-        StringBuilder sb = new StringBuilder();
-        checkpoints.forEach(cp -> sb.append(cp.getName()).append(", "));
-        return sb.toString();
+        return checkpoints.stream().map(BhopCheckpoint::getName).collect(Collectors.joining());
     }
 
     public Location getComebackLocation() {

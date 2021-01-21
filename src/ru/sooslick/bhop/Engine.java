@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -16,15 +17,13 @@ import ru.sooslick.bhop.region.WorldGuardRegion;
 import ru.sooslick.bhop.util.BhopUtil;
 import ru.sooslick.bhop.util.InventoryUtil;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class Engine extends JavaPlugin {
 
@@ -96,9 +95,7 @@ public class Engine extends JavaPlugin {
     }
 
     public String getBhopLevels() {
-        StringBuilder sb = new StringBuilder();
-        levels.forEach(level -> sb.append(level.getName()).append(", "));
-        return sb.toString();
+        return levels.stream().map(BhopLevel::getName).collect(Collectors.joining(", "));
     }
 
     public List<BhopLevel> getBhopLevelList() {
@@ -264,6 +261,17 @@ public class Engine extends JavaPlugin {
 
     public int getActivePlayersCount() {
         return activePlayers.size();
+    }
+
+    public void printPlayerStat(CommandSender sender, String name) {
+        AtomicInteger entries = new AtomicInteger();
+        levels.forEach(bhl -> bhl.getRecords().stream().filter(bhr -> bhr.getName().equals(name))
+                .forEach(bhr -> {
+                    sender.sendMessage("§e" + bhl.getName() + ": " + bhr.formatTime());
+                    entries.getAndIncrement();
+                }));
+        if (entries.get() == 0)
+            sender.sendMessage("§cNo stat found for player " + name);
     }
 
     private void reload() {

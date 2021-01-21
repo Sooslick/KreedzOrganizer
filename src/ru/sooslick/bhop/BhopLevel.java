@@ -3,6 +3,7 @@ package ru.sooslick.bhop;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.command.CommandSender;
 import ru.sooslick.bhop.exception.WorldGuardException;
 import ru.sooslick.bhop.region.BhopRegion;
 import ru.sooslick.bhop.region.DefaultBhopRegion;
@@ -12,6 +13,8 @@ import ru.sooslick.bhop.util.BhopUtil;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class BhopLevel {
 
@@ -122,6 +125,22 @@ public class BhopLevel {
 
     public BhopRecord getLevelRecord() {
         return records.stream().sorted().findFirst().orElse(null);
+    }
+
+    public void printLeaderboard(CommandSender sender) {
+        BhopRecord own = getPlayerRecord(sender.getName());
+        AtomicBoolean top10 = new AtomicBoolean(false);
+        AtomicInteger pos = new AtomicInteger(1);
+        getRecords().stream().sorted().limit(10).forEachOrdered(rec -> {
+            if (rec.getName().equals(own.getName())) {
+                top10.set(true);
+                sender.sendMessage("§a" + pos.getAndIncrement() + ": " + rec.getName() + " (" + rec.formatTime() + ")");
+            } else
+                sender.sendMessage("§6" + pos.getAndIncrement() + ":§e " + rec.getName() + " §7(" + rec.formatTime() + ")");
+        });
+
+        if (!top10.get())
+            sender.sendMessage("§a?: " + own.getName() + " (" + own.formatTime() + ")");
     }
 
     public void setChanged() {

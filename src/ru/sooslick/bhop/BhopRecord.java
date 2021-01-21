@@ -1,5 +1,7 @@
 package ru.sooslick.bhop;
 
+import java.time.Duration;
+
 public class BhopRecord implements Comparable {
 
     private final String playerName;
@@ -16,6 +18,10 @@ public class BhopRecord implements Comparable {
 
     public int getTime() {
         return playerTime;
+    }
+
+    public String formatTime() {
+        return Duration.ofSeconds(playerTime).toString();
     }
 
     public void setTime(int newTime) {
