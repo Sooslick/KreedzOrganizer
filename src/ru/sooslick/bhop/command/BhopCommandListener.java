@@ -101,7 +101,7 @@ public class BhopCommandListener implements CommandExecutor {
             return sendMessageAndReturn(sender, CONSOLE_CANNOT_BHOP);
         if (!sender.hasPermission(BhopPermissions.GAMEPLAY))
             return sendMessageAndReturn(sender, NO_PERMISSION);
-        //todo: move engine checks to engine - bhop level exists, sender not console, etc...
+
         if (args.length == 0)
             return sendMessageAndReturn(sender, command.getUsage());
         switch (args[0].toLowerCase()) {

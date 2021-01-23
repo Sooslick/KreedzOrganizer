@@ -10,6 +10,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
 import ru.sooslick.bhop.command.BhopCommandListener;
 import ru.sooslick.bhop.command.BhopEditCommandListener;
 import ru.sooslick.bhop.exception.WorldGuardException;
@@ -90,6 +91,10 @@ public class Engine extends JavaPlugin {
         saveAll();
     }
 
+    public boolean isUseWg() {
+        return useWg;
+    }
+
     public BhopLevel getBhopLevel(String name) {
         return levels.stream().filter(level -> level.getName().equals(name)).findFirst().orElse(null);
     }
@@ -106,9 +111,7 @@ public class Engine extends JavaPlugin {
         return levels.stream().map(level -> level.distanceToLevel(l)).min(Double::compareTo).orElse(BhopUtil.MAXD);
     }
 
-    public BhopCheckpoint getBhopCheckpoint(BhopPlayer bhpl, String cpName) {
-        if (bhpl == null)
-            return null;
+    public BhopCheckpoint getBhopCheckpoint(@NotNull BhopPlayer bhpl, String cpName) {
         BhopLevel bhl = bhpl.getLevel();
         if (bhl == null) {
             LOG.warning("Detected BhopPlayer without Level, player - " + bhpl.getPlayer().getName());
@@ -118,7 +121,7 @@ public class Engine extends JavaPlugin {
         return bhpl.getCheckpointsSet().contains(bhcp) ? bhcp : null;
     }
 
-    public BhopPlayer playerStartEvent(Player p, BhopLevel bhl) {
+    public BhopPlayer playerStartEvent(@NotNull Player p, @NotNull BhopLevel bhl) {
         LOG.info("Bhop player start event triggered");
         //remove player from DC list if presents
         dcPlayers.remove(getDcPlayer(p));
@@ -156,10 +159,8 @@ public class Engine extends JavaPlugin {
         return activeBhpl;
     }
 
-    public void playerLoadEvent(BhopPlayer bhpl, BhopCheckpoint cp) {
+    public void playerLoadEvent(@NotNull BhopPlayer bhpl, @NotNull BhopCheckpoint cp) {
         LOG.info("Bhop player load event triggered");
-        if (bhpl == null)
-            return;
         if (!bhpl.getCheckpointsSet().contains(cp))
             return;
         Player p = bhpl.getPlayer();
@@ -167,10 +168,8 @@ public class Engine extends JavaPlugin {
         p.sendMessage("§eLoaded checkpoint " + cp.getName());
     }
 
-    public void playerRejoinEvent(BhopPlayer bhpl) {
+    public void playerRejoinEvent(@NotNull BhopPlayer bhpl) {
         LOG.info("Bhop player rejoin event triggered");
-        if (bhpl == null)
-            return;
         if (!dcPlayers.contains(bhpl))
             return;
         Player p = bhpl.getPlayer();
@@ -189,14 +188,12 @@ public class Engine extends JavaPlugin {
         }
     }
 
-    public void playerExitEvent(BhopPlayer bhpl) {
+    public void playerExitEvent(@NotNull BhopPlayer bhpl) {
         playerExitEvent(bhpl, false);
     }
 
-    public void playerExitEvent(BhopPlayer bhpl, boolean dc) {
+    public void playerExitEvent(@NotNull BhopPlayer bhpl, boolean dc) {
         LOG.info("Bhop player exit event triggered");
-        if (bhpl == null)
-            return;
         activePlayers.remove(bhpl);
 
         if (dc) {
@@ -341,14 +338,13 @@ public class Engine extends JavaPlugin {
                 csParams.load(LEVELS_PATH + levelName + YAML_EXTENSION);
                 BhopLevel bhopLevel = new BhopLevel(levelName);
                 World w = Bukkit.getWorld(csParams.getString("world"));
-                //todo terrible region assignment, rework section
-                //todo implement world guard holder to check region changes
+                //todo test region changes ingame, implement alternate getBound method
                 boolean rgSuccess = false;
                 if (useWg) {
                     try {
                         rgSuccess = bhopLevel.setRegion(w, csParams.getString("region"));
                     } catch (WorldGuardException e) {
-                        LOG.warning("Disabled World Guard integration");
+                        LOG.warning("World Guard integration disabled");
                         useWg = false;
                     }
                 }

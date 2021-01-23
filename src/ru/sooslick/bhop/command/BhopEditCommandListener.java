@@ -8,11 +8,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import ru.sooslick.bhop.BhopAdminManager;
-import ru.sooslick.bhop.BhopLevel;
-import ru.sooslick.bhop.BhopPermissions;
-import ru.sooslick.bhop.Engine;
-import ru.sooslick.bhop.TriggerType;
+import ru.sooslick.bhop.*;
 import ru.sooslick.bhop.util.BhopUtil;
 
 public class BhopEditCommandListener implements CommandExecutor {
@@ -35,7 +31,6 @@ public class BhopEditCommandListener implements CommandExecutor {
     private static final String SET_TRIGGER = "trigger";
     private static final String SET_TRIGGER_TYPE = "triggertype";
 
-    //todo: same messages in BhopCommandListener
     private static final String NO_PERMISSION = "§cYou have not permissions";
 
     @Override
@@ -81,7 +76,9 @@ public class BhopEditCommandListener implements CommandExecutor {
                 }
                 switch (args[1].toLowerCase()) {
                     case SET_REGION:
-                        //todo: check wgEnabled
+                        if (!Engine.getInstance().isUseWg()) {
+                            return sendMessageAndReturn(sender, "§cWorldGuard regions not available, use §6/bhopmanage set bound1/bound2");
+                        }
                         if (args.length == 2)
                             return sendMessageAndReturn(sender, "§c/bhopmanage set region <world guard region> [world]");
                         World world = null;

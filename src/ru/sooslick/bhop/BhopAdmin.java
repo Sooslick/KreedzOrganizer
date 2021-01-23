@@ -5,12 +5,7 @@ import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import ru.sooslick.bhop.region.BhopRegion;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class BhopAdmin {
 
@@ -40,11 +35,12 @@ public class BhopAdmin {
             bound1 = level.getBhopRegion().getBound1();
             bound2 = level.getBhopRegion().getBound2();
         }
-        //todo: do not add region in useWg is disabled
-        checklist = enableChecklist ?
-                new HashSet<>(Arrays.asList(CheckListEntry.REGION, CheckListEntry.BOUNDS, CheckListEntry.START,
-                        CheckListEntry.FINISH, CheckListEntry.TRIGGER, CheckListEntry.CHECKPOINTS)) :
-                Collections.emptySet();
+        checklist = new HashSet<>();
+        if (enableChecklist) {
+            if (Engine.getInstance().isUseWg()) checklist.add(CheckListEntry.REGION);
+            checklist.addAll(Arrays.asList(CheckListEntry.BOUNDS, CheckListEntry.START,
+                    CheckListEntry.FINISH, CheckListEntry.TRIGGER, CheckListEntry.CHECKPOINTS));
+        }
     }
 
     public CommandSender getAdmin() {

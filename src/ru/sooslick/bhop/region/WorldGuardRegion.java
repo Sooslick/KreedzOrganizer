@@ -16,7 +16,6 @@ public class WorldGuardRegion implements BhopRegion {
     ProtectedRegion region;
     World world;
 
-    //todo adequate Exceptions and messages + logging
     public WorldGuardRegion(World w, String rgName) throws Exception {
         world = w;
         try {

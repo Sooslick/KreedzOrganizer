@@ -38,7 +38,6 @@ public class BhopLevel {
         return new File(Engine.LEVELS_PATH + name + Engine.YAML_EXTENSION);
     }
 
-    // todo awful method. Just rework
     public boolean setRegion(World world, String rgName) throws WorldGuardException {
         //try to assign WG region
         try {
