@@ -5,10 +5,12 @@ import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import ru.sooslick.bhop.command.BhopCommandListener;
@@ -41,6 +43,7 @@ public class Engine extends JavaPlugin {
 
     public static Logger LOG;
     private static Engine instance;
+    private static EventListener listener;
 
     private static String DATA_FOLDER_PATH;
     private static String LEVELS_DIR;
@@ -74,16 +77,6 @@ public class Engine extends JavaPlugin {
         INVENTORY_PATH = DATA_FOLDER_PATH + CFG_INVENTORY + File.separator;
         INVENTORY_BACKUP_PATH = DATA_FOLDER_PATH + CFG_INVENTORY + CFG_BACKUP + File.separator;
         reload();
-        //todo: impl reload command to reinit listeners and activePlayers / dcPlayers
-
-        //init listeners;
-        getServer().getPluginManager().registerEvents(new EventListener(this), this);
-        getCommand(COMMAND_BHOP).setExecutor(new BhopCommandListener());
-        getCommand(COMMAND_BHOPEDIT).setExecutor(new BhopEditCommandListener());
-
-        //init other variables
-        activePlayers = new ArrayList<>();
-        dcPlayers = new ArrayList<>();
     }
 
     @Override
@@ -147,7 +140,6 @@ public class Engine extends JavaPlugin {
         if (p.getGameMode() == GameMode.SPECTATOR)
             p.setGameMode(GameMode.ADVENTURE);
         else if (p.getGameMode() != GameMode.SURVIVAL && p.getGameMode() != GameMode.ADVENTURE)
-            //todo: more cheats checks: ingame gamemodes, teleports, commands, etc admin features
             activeBhpl.enableCheats();
 
         //launch timer if not exists
@@ -179,9 +171,13 @@ public class Engine extends JavaPlugin {
             return;
         }
         dcPlayers.remove(bhpl);
-        // a lot of code duplications, todo ref
         activePlayers.add(bhpl);
-        bhpl.getPlayer().teleport(bhpl.getDcLocation());
+        p.teleport(bhpl.getDcLocation());
+        //check gamemode
+        if (p.getGameMode() == GameMode.SPECTATOR)
+            p.setGameMode(GameMode.ADVENTURE);
+        else if (p.getGameMode() != GameMode.SURVIVAL && p.getGameMode() != GameMode.ADVENTURE)
+            bhpl.enableCheats();
         //launch timer if not exists
         if (bhopTimerId == 0) {
             bhopTimerId = Bukkit.getScheduler().scheduleSyncRepeatingTask(this, bhopTimerProcessor, 1, 20);
@@ -272,7 +268,6 @@ public class Engine extends JavaPlugin {
     }
 
     private void reload() {
-        //todo a lot of rework required: reinit variables, listeners and reload configs.
         LOG = Bukkit.getLogger();
         LOG.info("Bhop init");
 
@@ -321,7 +316,6 @@ public class Engine extends JavaPlugin {
         }
 
         //load and read config
-        //todo: refactor to Cfg class
         cfg = getConfig();
         useWg = cfg.getBoolean(CFG_USEWG, false);
         List<?> csLevels = cfg.getList(CFG_LEVELS);
@@ -338,7 +332,6 @@ public class Engine extends JavaPlugin {
                 csParams.load(LEVELS_PATH + levelName + YAML_EXTENSION);
                 BhopLevel bhopLevel = new BhopLevel(levelName);
                 World w = Bukkit.getWorld(csParams.getString("world"));
-                //todo test region changes ingame, implement alternate getBound method
                 boolean rgSuccess = false;
                 if (useWg) {
                     try {
@@ -410,6 +403,23 @@ public class Engine extends JavaPlugin {
         } else {
             LOG.info("Leaderboards.yml is not exists, skipped");
         }
+
+        //init listeners;
+        if (listener != null)
+            HandlerList.unregisterAll(listener);
+        listener = new EventListener(this);
+        getServer().getPluginManager().registerEvents(listener, this);
+
+        PluginCommand cmd = getCommand(COMMAND_BHOP);
+        assert cmd != null;
+        cmd.setExecutor(new BhopCommandListener());
+        cmd = getCommand(COMMAND_BHOPEDIT);
+        assert cmd != null;
+        cmd.setExecutor(new BhopEditCommandListener());
+
+        //init other variables
+        activePlayers = new ArrayList<>();
+        dcPlayers = new ArrayList<>();
     }
 
     private void saveAll() {
@@ -494,8 +504,12 @@ public class Engine extends JavaPlugin {
         }
     }
 
-    //todo:
-    //  create arenas from game
+    //todo future features:
     //  separate listeners: gameplay / antigriefing
     //  cfg field: enableDefaultAntigriefing
+    //  refactor cfg to class
+    //  more antigriefing checks
+    //  more "cheated" checks
+    //  region changes detection
+    //  code refactoring
 }
