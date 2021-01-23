@@ -269,12 +269,23 @@ public class BhopAdmin {
             admin.sendMessage("§cYou aren't editing any checkpoint, use §6/bhopmanage checkpoint create / edit §ccommands");
             return;
         }
-        //todo: validate and format errors list, check bounding and etc
-        if (cpLoad == null && cpTrigger == null) {
-            admin.sendMessage("§cCannot save checkpoint, trigger and load positions are not specified");
+        List<String> errors = new LinkedList<>();
+        //validate
+        if (cpLoad == null && cpTrigger == null)
+            errors.add("§cTrigger and load positions are not specified");
+        if (level.getBhopRegion() != null) {
+            if (cpLoad != null)
+                if (!level.isInside(cpLoad))
+                    errors.add("§cLoad position is outside of level");
+            if (cpTrigger != null)
+                if (!level.isInside(cpTrigger))
+                    errors.add("§cTrigger position is outside of level");
+        }
+        if (!errors.isEmpty()) {
+            admin.sendMessage("§cCannot save checkpoint, please resolve errors:");
+            errors.forEach(admin::sendMessage);
             return;
         }
-        //todo before here
         if (cpLoad == null)
             cpLoad = cpTrigger;
         else if (cpTrigger == null)
@@ -306,7 +317,6 @@ public class BhopAdmin {
         admin.sendMessage(sb.toString());
     }
 
-    //todo rework (and remove?)
     private enum CheckListEntry {
         REGION("Region"),
         BOUNDS("Boundaries"),
