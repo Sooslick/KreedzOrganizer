@@ -14,7 +14,7 @@ import ru.sooslick.bhop.exception.WorldGuardException;
 
 public class WorldGuardRegion implements BhopRegion {
     ProtectedRegion region;
-    World world;
+    final World world;
 
     public WorldGuardRegion(World w, String rgName) throws Exception {
         world = w;

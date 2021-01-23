@@ -19,6 +19,7 @@ public class InventoryUtil {
 
     private static final SimpleDateFormat sdf = new SimpleDateFormat("yyMMddHHmmssSSS");
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public static boolean invToFile(Player p) {
         Bukkit.getLogger().info("saving inventory of player " + p.getName());
         //store inv contents to file
@@ -32,6 +33,7 @@ public class InventoryUtil {
             yaml.save(f);
             yaml.save(backup);
         } catch (IOException e) {
+            //noinspection ResultOfMethodCallIgnored
             f.delete();
             return false;
         }
@@ -42,6 +44,7 @@ public class InventoryUtil {
         return true;
     }
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public static boolean invFromFile(Player p) {
         Bukkit.getLogger().info("loading inventory of player " + p.getName());
         File f = new File(Engine.INVENTORY_PATH + p.getName() + Engine.YAML_EXTENSION);
@@ -51,7 +54,13 @@ public class InventoryUtil {
         } catch (IOException | InvalidConfigurationException e) {
             return false;
         }
-        ItemStack[] content = ((List<ItemStack>) yaml.get("inventory.content")).toArray(new ItemStack[0]);
+        ItemStack[] content;
+        try {
+            content = ((List<ItemStack>) yaml.get("inventory.content")).toArray(new ItemStack[0]);
+        } catch (Exception e) {
+            Bukkit.getLogger().warning("Error while attempt to restore player's inventory\n" + e.getMessage());
+            return false;
+        }
         if (!f.delete()) {
             return false;
         }

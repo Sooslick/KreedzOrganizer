@@ -32,6 +32,7 @@ public class BhopCheckpoint {
         return name;
     }
 
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
     @Override
     public BhopCheckpoint clone() {
         return new BhopCheckpoint(name, loadLocation.clone(), triggerLocation.clone(), triggerType);

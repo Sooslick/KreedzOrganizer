@@ -22,6 +22,7 @@ import ru.sooslick.bhop.util.InventoryUtil;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -51,14 +52,13 @@ public class Engine extends JavaPlugin {
     public static String INVENTORY_PATH;
     public static String INVENTORY_BACKUP_PATH;
 
-    private FileConfiguration cfg;
     private List<BhopLevel> levels;
     private List<BhopPlayer> activePlayers;
     private List<BhopPlayer> dcPlayers;
     private int bhopTimerId = 0;
     private boolean useWg = false;
 
-    private Runnable bhopTimerProcessor = () -> {
+    private final Runnable bhopTimerProcessor = () -> {
         for (BhopPlayer bhpl : activePlayers.toArray(new BhopPlayer[0])) {
             bhpl.tick();
         }
@@ -316,9 +316,10 @@ public class Engine extends JavaPlugin {
         }
 
         //load and read config
-        cfg = getConfig();
+        FileConfiguration cfg = getConfig();
         useWg = cfg.getBoolean(CFG_USEWG, false);
         List<?> csLevels = cfg.getList(CFG_LEVELS);
+        if (csLevels == null) csLevels = Collections.emptyList();
         levels = new ArrayList<>();
         for (Object obj : csLevels) {
             String levelName = (String) obj;

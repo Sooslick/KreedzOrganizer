@@ -288,6 +288,7 @@ public class BhopEditCommandListener implements CommandExecutor {
         return null;
     }
 
+    @SuppressWarnings("SameReturnValue")
     private boolean sendMessageAndReturn(CommandSender sender, String message) {
         sender.sendMessage(message);
         return true;

@@ -158,6 +158,7 @@ public class BhopLevel {
         return BhopUtil.distanceBetween(l, bounds.getBound1(), bounds.getBound2());
     }
 
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
     @Override
     public BhopLevel clone() {
         BhopLevel copy = new BhopLevel(name);

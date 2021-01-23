@@ -80,7 +80,7 @@ public class BhopAdmin {
             bound2 = loc;
         }
         if (bound1 != null && bound2 != null) {
-            if (!bound1.getWorld().equals(bound2.getWorld())) {
+            if (bound1.getWorld() != bound2.getWorld()) {
                 admin.sendMessage("§cBounds are located in different worlds, cannot set bounding");
                 return;
             }
@@ -104,7 +104,7 @@ public class BhopAdmin {
     public void setStart(Location loc) {
         //check region
         if (level.getBhopRegion() != null) {
-            if (!level.getBhopRegion().getBound1().getWorld().equals(loc.getWorld())) {
+            if (level.getBhopRegion().getBound1().getWorld() != loc.getWorld()) {
                 admin.sendMessage("§cBounding are located in different world, cannot set start");
                 return;
             }
@@ -118,7 +118,7 @@ public class BhopAdmin {
     public void setFinish(Location loc) {
         //check region
         if (level.getBhopRegion() != null) {
-            if (!level.getBhopRegion().getBound1().getWorld().equals(loc.getWorld())) {
+            if (level.getBhopRegion().getBound1().getWorld() != loc.getWorld()) {
                 admin.sendMessage("§cBounding are located in different world, cannot set start");
                 return;
             }

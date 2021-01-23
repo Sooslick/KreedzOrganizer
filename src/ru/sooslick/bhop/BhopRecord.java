@@ -1,8 +1,10 @@
 package ru.sooslick.bhop;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.time.Duration;
 
-public class BhopRecord implements Comparable {
+public class BhopRecord implements Comparable<Object> {
 
     private final String playerName;
     private int playerTime;
@@ -29,9 +31,7 @@ public class BhopRecord implements Comparable {
     }
 
     @Override
-    public int compareTo(Object o) {
-        if (o == null)
-            return 0;
+    public int compareTo(@NotNull Object o) {
         if (!(o instanceof BhopRecord))
             return 0;
         return Integer.compare(playerTime, ((BhopRecord) o).getTime());

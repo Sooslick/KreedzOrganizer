@@ -185,6 +185,7 @@ public class BhopCommandListener implements CommandExecutor {
         }
     }
 
+    @SuppressWarnings("SameReturnValue")
     private boolean sendMessageAndReturn(CommandSender sender, String message) {
         sender.sendMessage(message);
         return true;

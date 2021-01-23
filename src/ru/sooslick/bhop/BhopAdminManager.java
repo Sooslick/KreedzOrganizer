@@ -145,13 +145,13 @@ public class BhopAdminManager {
     public static void resetScore(CommandSender sender, BhopLevel level, boolean confirm) {
         PendingCommand pc = getPendingCommand(sender);
         if (pc == null) {
-            pendingCommands.add(new PendingCommand(sender, BhopAction.DISCARD));
+            pendingCommands.add(new PendingCommand(sender, BhopAction.RESET));
             sender.sendMessage("§cYou cannot undo this operation. Type §e/bhopmanage reset " + level.getName() + " sure §cfor confirmation");
             return;
         }
         if (pc.getAction() != BhopAction.DELETE) {
             pc.deactivate();
-            pendingCommands.add(new PendingCommand(sender, BhopAction.DISCARD));
+            pendingCommands.add(new PendingCommand(sender, BhopAction.RESET));
             sender.sendMessage("§cYou cannot undo this operation. Type §e/bhopmanage reset " + level.getName() + " sure §cfor confirmation");
             return;
         }

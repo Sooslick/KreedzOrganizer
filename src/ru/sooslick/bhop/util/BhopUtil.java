@@ -38,6 +38,8 @@ public class BhopUtil {
 
     public static Location stringToLocation(World w, String s) {
         Location l = stringToLocation(s);
+        if (l == null)
+            return null;
         l.setWorld(w);
         return l;
     }
@@ -61,7 +63,7 @@ public class BhopUtil {
     }
 
     public static double distance(Location a, Location b) {
-        if (!a.getWorld().equals(b.getWorld()))
+        if (a.getWorld() != b.getWorld())
             return MAXD;
         return diag(
                 a.getX() - b.getX(),
@@ -70,7 +72,7 @@ public class BhopUtil {
     }
 
     public static double distanceBetween(Location l, Location bound1, Location bound2) {
-        if (!l.getWorld().equals(bound1.getWorld()))
+        if (l.getWorld() != bound1.getWorld())
             return MAXD;
         return diag(
                 distanceBetween(l.getX(), bound1.getX(), bound2.getX()),
