@@ -1,7 +1,6 @@
-package ru.sooslick.bhop;
+package ru.sooslick.bhop.command;
 
 import org.bukkit.command.CommandSender;
-import ru.sooslick.bhop.command.BhopAction;
 
 public class PendingCommand {
     private static final long LIFETIME = 30000L;

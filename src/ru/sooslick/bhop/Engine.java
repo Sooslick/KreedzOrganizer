@@ -104,14 +104,8 @@ public class Engine extends JavaPlugin {
         return levels.stream().map(level -> level.distanceToLevel(l)).min(Double::compareTo).orElse(BhopUtil.MAXD);
     }
 
-    public BhopCheckpoint getBhopCheckpoint(@NotNull BhopPlayer bhpl, String cpName) {
-        BhopLevel bhl = bhpl.getLevel();
-        if (bhl == null) {
-            LOG.warning("Detected BhopPlayer without Level, player - " + bhpl.getPlayer().getName());
-            return null;
-        }
-        BhopCheckpoint bhcp = bhl.getCheckpoint(cpName);
-        return bhpl.getCheckpointsSet().contains(bhcp) ? bhcp : null;
+    public BhopCheckpoint getBhopPlayerCheckpoint(@NotNull BhopPlayer bhpl, String cpName) {
+        return bhpl.getCheckpoint(cpName);
     }
 
     public BhopPlayer playerStartEvent(@NotNull Player p, @NotNull BhopLevel bhl) {
@@ -512,5 +506,6 @@ public class Engine extends JavaPlugin {
     //  more antigriefing checks
     //  more "cheated" checks
     //  region changes detection
+    //  sign records
     //  code refactoring
 }

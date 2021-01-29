@@ -56,7 +56,7 @@ public class BhopEditCommandListener implements CommandExecutor {
                 bhl = Engine.getInstance().getBhopLevel(args[1]);
                 if (bhl == null)
                     return sendMessageAndReturn(sender, "§cLevel §6" + args[1] + " §cnot found");
-                boolean confirm = (args.length > 2 && args[2].equals("sure"));
+                boolean confirm = (args.length > 2 && args[2].equalsIgnoreCase("sure"));
                 BhopAdminManager.deleteLevel(sender, bhl, confirm);
                 return true;
 

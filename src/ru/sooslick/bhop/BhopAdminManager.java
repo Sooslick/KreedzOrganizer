@@ -4,6 +4,7 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import ru.sooslick.bhop.command.BhopAction;
+import ru.sooslick.bhop.command.PendingCommand;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -145,11 +146,13 @@ public class BhopAdminManager {
     public static void resetScore(CommandSender sender, BhopLevel level, boolean confirm) {
         PendingCommand pc = getPendingCommand(sender);
         if (pc == null) {
+            Engine.LOG.info("Reset score: pending command is null. Create new pending command");
             pendingCommands.add(new PendingCommand(sender, BhopAction.RESET));
             sender.sendMessage("§cYou cannot undo this operation. Type §e/bhopmanage reset " + level.getName() + " sure §cfor confirmation");
             return;
         }
         if (pc.getAction() != BhopAction.DELETE) {
+            Engine.LOG.info("Reset score: action of pending command is not delete. Deactivate old and create new pending command");
             pc.deactivate();
             pendingCommands.add(new PendingCommand(sender, BhopAction.RESET));
             sender.sendMessage("§cYou cannot undo this operation. Type §e/bhopmanage reset " + level.getName() + " sure §cfor confirmation");
@@ -235,7 +238,7 @@ public class BhopAdminManager {
 
     private static List<PendingCommand> activePendingCommands() {
         //cleanup
-        pendingCommands.removeAll(pendingCommands.stream()
+        pendingCommands.retainAll(pendingCommands.stream()
                 .filter(PendingCommand::isActive)
                 .collect(Collectors.toList()));
         return pendingCommands;

@@ -22,13 +22,16 @@ public class BhopAdmin {
     private TriggerType cpType;
 
     public BhopAdmin(CommandSender admin, BhopLevel level, boolean enableChecklist) {
+        //empty level if created or clone if edited
         this.admin = admin;
         this.level = level;
+        // checkpoint template
         cpName = null;
         cpLoad = null;
         cpTrigger = null;
         cpType = TriggerType.MOVEMENT;
-        if (level == null) {
+        //bound template
+        if (level.getBhopRegion() == null) {
             bound1 = null;
             bound2 = null;
         } else {

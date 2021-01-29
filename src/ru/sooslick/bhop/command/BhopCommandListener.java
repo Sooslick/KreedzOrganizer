@@ -61,7 +61,7 @@ public class BhopCommandListener implements CommandExecutor {
                     if (sender instanceof Player)
                         bhpl = engine.getBhopPlayer((Player) sender);
                     if (bhpl != null)
-                        return sendMessageAndReturn(sender, bhpl.getCheckpoints());
+                        return sendMessageAndReturn(sender, bhpl.formatCheckpoints());
                     else
                         return sendMessageAndReturn(sender, "§c/bhop checkpoints <level name>");
                     
@@ -136,9 +136,9 @@ public class BhopCommandListener implements CommandExecutor {
                     return sendMessageAndReturn(sender, NOT_PRACTICE);
                 if (args.length == 1)
                     return sendMessageAndReturn(sender, USAGE_SAVE);
-                for (BhopCheckpoint cp : bhpl.getCheckpointsSet())
-                    if (cp.getName().equalsIgnoreCase(args[1]))
-                        sendMessageAndReturn(sender, String.format(CHECKPOINT_EXISTS, args[1]));
+                BhopCheckpoint cp = bhpl.getCheckpoint(args[1]);
+                if (cp != null)
+                    return sendMessageAndReturn(sender, String.format(CHECKPOINT_EXISTS, args[1]));
                 Location loc = bhpl.getPlayer().getLocation();
                 bhpl.addCheckpoint(new BhopCheckpoint(args[1], loc, loc, TriggerType.INTERACT));
                 return sendMessageAndReturn(sender, String.format(CHECKPOINT_SAVED, args[1]));
@@ -152,13 +152,13 @@ public class BhopCommandListener implements CommandExecutor {
                 if (args.length == 1) {
                     sender.sendMessage(CHECKPOINT_REQUIRED);
                     sender.sendMessage(AVAILABLE_CHECKPOINTS);
-                    return sendMessageAndReturn(sender, bhpl.getCheckpoints());
+                    return sendMessageAndReturn(sender, bhpl.formatCheckpoints());
                 }
-                BhopCheckpoint bhcp = engine.getBhopCheckpoint(bhpl, args[1]);
+                BhopCheckpoint bhcp = engine.getBhopPlayerCheckpoint(bhpl, args[1]);
                 if (bhcp == null) {
                     sender.sendMessage(CHECKPOINT_NOT_FOUND);
                     sender.sendMessage(AVAILABLE_CHECKPOINTS);
-                    return sendMessageAndReturn(sender, bhpl.getCheckpoints());
+                    return sendMessageAndReturn(sender, bhpl.formatCheckpoints());
                 }
                 engine.playerLoadEvent(bhpl, bhcp);
                 return true;

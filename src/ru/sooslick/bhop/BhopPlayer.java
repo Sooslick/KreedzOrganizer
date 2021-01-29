@@ -47,6 +47,10 @@ public class BhopPlayer {
 
     public BhopLevel getLevel() { return level; }
 
+    public BhopCheckpoint getCheckpoint(String name) {
+        return checkpoints.stream().filter(cp -> cp.getName().equals(name)).findFirst().orElse(null);
+    }
+
     public Set<BhopCheckpoint> getCheckpointsSet() {
         return checkpoints;
     }
@@ -55,7 +59,7 @@ public class BhopPlayer {
         return checkpoints.add(cp);
     }
 
-    public String getCheckpoints() {
+    public String formatCheckpoints() {
         return checkpoints.stream().map(BhopCheckpoint::getName).collect(Collectors.joining());
     }
 
