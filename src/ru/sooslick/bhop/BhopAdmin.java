@@ -50,6 +50,10 @@ public class BhopAdmin {
         return admin;
     }
 
+    public BhopLevel getLevel() {
+        return level;
+    }
+
     public void setRegion(World world, String rgName) {
         try {
             if (level.setRegion(world, rgName)) {

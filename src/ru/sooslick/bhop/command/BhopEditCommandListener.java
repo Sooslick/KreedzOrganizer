@@ -7,11 +7,18 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.event.server.TabCompleteEvent;
 import org.jetbrains.annotations.NotNull;
 import ru.sooslick.bhop.*;
 import ru.sooslick.bhop.util.BhopUtil;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
 public class BhopEditCommandListener implements CommandExecutor {
+    public static final String COMMAND_MANAGE = "bhopmanage";
+    public static final String COMMAND_MANAGE_ALIAS = "bhed";
+
     private static final String COMMAND_CHECKPOINT = "checkpoint";
     private static final String COMMAND_CREATE = "create";
     private static final String COMMAND_DELETE = "delete";
@@ -292,5 +299,53 @@ public class BhopEditCommandListener implements CommandExecutor {
     private boolean sendMessageAndReturn(CommandSender sender, String message) {
         sender.sendMessage(message);
         return true;
+    }
+
+    //////////////////
+    // TAB COMPLETE //
+
+    public static void tabComplete(TabCompleteEvent e, String[] args) {
+        if (args.length == 1) {
+            e.setCompletions(Arrays.asList(COMMAND_CREATE, COMMAND_EDIT, COMMAND_DELETE, COMMAND_SET, COMMAND_CHECKPOINT,
+                    COMMAND_SAVE, COMMAND_DISCARD, COMMAND_RESET, COMMAND_HELP));
+            return;
+        }
+        Engine engine = Engine.getInstance();
+        if (args.length == 2) {
+            switch (args[1].toLowerCase()) {
+                case COMMAND_EDIT:
+                case COMMAND_DELETE:
+                case COMMAND_RESET:
+                    e.setCompletions(engine.getBhopLevelList().stream().map(BhopLevel::getName).collect(Collectors.toList()));
+                    return;
+                case COMMAND_SET:
+                    e.setCompletions(Arrays.asList(SET_BOUND1, SET_BOUND2, SET_START, SET_FINISH, SET_REGION, SET_TRIGGER_TYPE));
+                    return;
+                case COMMAND_CHECKPOINT:
+                    e.setCompletions(Arrays.asList(COMMAND_CREATE, COMMAND_EDIT, COMMAND_DELETE, COMMAND_SET,
+                            COMMAND_SAVE, COMMAND_DISCARD));
+                    return;
+            }
+        }
+        if (args.length == 3) {
+            if (args[1].equalsIgnoreCase(COMMAND_SET) && args[2].equalsIgnoreCase(SET_TRIGGER_TYPE)) {
+                e.setCompletions(Arrays.asList("movement", "interact"));
+                return;
+            }
+            if (args[1].equalsIgnoreCase(COMMAND_CHECKPOINT)) {
+                if (args[2].equalsIgnoreCase(COMMAND_EDIT) || args[2].equalsIgnoreCase(COMMAND_DELETE)) {
+                    BhopAdmin admin = BhopAdminManager.getActiveAdmin(e.getSender());
+                    e.setCompletions(admin.getLevel().getCheckpoints().stream().map(BhopCheckpoint::getName).collect(Collectors.toList()));
+                    return;
+                }
+                if (args[2].equalsIgnoreCase(COMMAND_SET)) {
+                    e.setCompletions(Arrays.asList(SET_TRIGGER_TYPE, SET_TRIGGER, SET_LOAD));
+                    return;
+                }
+            }
+        }
+        if (args.length == 4 && args[1].equalsIgnoreCase(COMMAND_CHECKPOINT) && args[2].equalsIgnoreCase(COMMAND_SET) && args[3].equalsIgnoreCase(SET_TRIGGER_TYPE)) {
+            e.setCompletions(Arrays.asList("movement", "interact"));
+        }
     }
 }

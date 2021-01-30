@@ -1,16 +1,21 @@
 package ru.sooslick.bhop.command;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.event.server.TabCompleteEvent;
 import org.jetbrains.annotations.NotNull;
 import ru.sooslick.bhop.*;
 
+import java.util.Arrays;
 import java.util.stream.Collectors;
 
 public class BhopCommandListener implements CommandExecutor {
+    public static final String COMMAND_BHOP = "bhop";
+    public static final String COMMAND_BHOP_ALIAS = "bh";
 
     private static final String COMMAND_START = "start";
     private static final String COMMAND_LOAD = "load";
@@ -189,5 +194,33 @@ public class BhopCommandListener implements CommandExecutor {
     private boolean sendMessageAndReturn(CommandSender sender, String message) {
         sender.sendMessage(message);
         return true;
+    }
+
+    public static void tabComplete(TabCompleteEvent e, String[] args) {
+        if (args.length == 1) {
+            e.setCompletions(Arrays.asList(COMMAND_START, COMMAND_LOAD, COMMAND_EXIT, COMMAND_CONTINUE, COMMAND_PRACTICE,
+                    COMMAND_SAVE, COMMAND_LEVELS, COMMAND_CHECKPOINTS, COMMAND_LEADERBOARDS, COMMAND_STAT, COMMAND_HELP));
+            return;
+        }
+        Engine engine = Engine.getInstance();
+        if (args.length == 2) {
+            switch (args[1].toLowerCase()) {
+                case COMMAND_START:
+                case COMMAND_PRACTICE:
+                case COMMAND_CHECKPOINTS:
+                case COMMAND_LEADERBOARDS:
+                    e.setCompletions(engine.getBhopLevelList().stream().map(BhopLevel::getName).collect(Collectors.toList()));
+                    return;
+                case COMMAND_LOAD:
+                    if (e.getSender() instanceof Player) {
+                        BhopPlayer bhpl = engine.getBhopPlayer((Player) e.getSender());
+                        if (bhpl != null)
+                            e.setCompletions(bhpl.getCheckpointsSet().stream().map(BhopCheckpoint::getName).collect(Collectors.toList()));
+                    }
+                    return;
+                case COMMAND_STAT:
+                    e.setCompletions(Bukkit.getOnlinePlayers().stream().map(Player::getName).collect(Collectors.toList()));
+            }
+        }
     }
 }

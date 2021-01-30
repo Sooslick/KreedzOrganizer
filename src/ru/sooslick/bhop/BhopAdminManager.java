@@ -251,7 +251,7 @@ public class BhopAdminManager {
                 .orElse(null);
     }
 
-    private static BhopAdmin getActiveAdmin(CommandSender sender) {
+    public static BhopAdmin getActiveAdmin(CommandSender sender) {
         return activeAdmins.stream()
                 .filter(admin -> admin.getAdmin().equals(sender))
                 .findFirst()

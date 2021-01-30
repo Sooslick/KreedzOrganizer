@@ -48,6 +48,16 @@
 
     <build>
         <sourceDirectory>${project.basedir}/src</sourceDirectory>
+        <resources>
+            <resource>
+                <directory>${project.build.sourceDirectory}</directory>
+                <includes>
+                    <include>config.yml</include>
+                    <include>defaultLevel.yml</include>
+                    <include>plugin.yml</include>
+                </includes>
+            </resource>
+        </resources>
     </build>
 
     <properties>

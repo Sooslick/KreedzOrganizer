@@ -14,12 +14,10 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
-import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.event.player.*;
+import org.bukkit.event.server.TabCompleteEvent;
+import ru.sooslick.bhop.command.BhopCommandListener;
+import ru.sooslick.bhop.command.BhopEditCommandListener;
 import ru.sooslick.bhop.util.BhopUtil;
 import ru.sooslick.bhop.util.InventoryUtil;
 
@@ -221,4 +219,20 @@ public class EventListener implements Listener {
         return bs.stream().map(b -> BhopUtil.distance(center, b.getLocation())).max(Double::compareTo).orElse(0d);
     }
 
+    ////////////////////
+    // TAB COMPLETION //
+
+    @EventHandler
+    public void onTabComplete(TabCompleteEvent e) {
+        String[] args = e.getBuffer().replaceAll("[ ]+", " ").trim().split(" ");
+        if (args.length == 0)
+            return;
+        if (args[0].equalsIgnoreCase(BhopCommandListener.COMMAND_BHOP) || args[0].equalsIgnoreCase(BhopCommandListener.COMMAND_BHOP_ALIAS)) {
+            BhopCommandListener.tabComplete(e, args);
+            return;
+        }
+        if (args[0].equalsIgnoreCase(BhopEditCommandListener.COMMAND_MANAGE) || args[0].equalsIgnoreCase(BhopEditCommandListener.COMMAND_MANAGE_ALIAS)) {
+            BhopEditCommandListener.tabComplete(e, args);
+        }
+    }
 }
