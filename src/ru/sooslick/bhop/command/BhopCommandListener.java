@@ -8,7 +8,12 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.server.TabCompleteEvent;
 import org.jetbrains.annotations.NotNull;
-import ru.sooslick.bhop.*;
+import ru.sooslick.bhop.BhopCheckpoint;
+import ru.sooslick.bhop.BhopLevel;
+import ru.sooslick.bhop.BhopPermissions;
+import ru.sooslick.bhop.BhopPlayer;
+import ru.sooslick.bhop.Engine;
+import ru.sooslick.bhop.TriggerType;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -51,7 +56,7 @@ public class BhopCommandListener implements CommandExecutor {
         if (args.length > 0) {
             switch (args[0].toLowerCase()) {
                 case COMMAND_LEVELS:
-                    sendMessageAndReturn(sender, engine.getBhopLevels());
+                    return sendMessageAndReturn(sender, engine.getBhopLevels());
                 case COMMAND_CHECKPOINTS:
                     //format checkpoints list if level specified
                     if (args.length > 1) {
@@ -220,6 +225,10 @@ public class BhopCommandListener implements CommandExecutor {
                     return;
                 case COMMAND_STAT:
                     e.setCompletions(Bukkit.getOnlinePlayers().stream().map(Player::getName).collect(Collectors.toList()));
+                    return;
+                default:
+                    e.setCompletions(Arrays.asList(COMMAND_START, COMMAND_LOAD, COMMAND_EXIT, COMMAND_CONTINUE, COMMAND_PRACTICE,
+                            COMMAND_SAVE, COMMAND_LEVELS, COMMAND_CHECKPOINTS, COMMAND_LEADERBOARDS, COMMAND_STAT, COMMAND_HELP));
             }
         }
     }

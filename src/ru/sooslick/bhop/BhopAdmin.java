@@ -5,7 +5,11 @@ import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import ru.sooslick.bhop.region.BhopRegion;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 public class BhopAdmin {
 
@@ -130,9 +134,9 @@ public class BhopAdmin {
                 return;
             }
         }
-        level.setStart(loc);
-        checklist.remove(CheckListEntry.START);
-        admin.sendMessage("§eSet start position for level");
+        level.setFinish(loc);
+        checklist.remove(CheckListEntry.FINISH);
+        admin.sendMessage("§eSet finish position for level");
         sendStatus();
     }
 
@@ -319,7 +323,7 @@ public class BhopAdmin {
     public void sendStatus() {
         if (checklist.isEmpty())
             return;
-        StringBuilder sb = new StringBuilder("§cChecklist: ");
+        StringBuilder sb = new StringBuilder("§7Checklist: ");
         checklist.forEach(e -> sb.append(e.getDescription()).append(", "));
         admin.sendMessage(sb.toString());
     }

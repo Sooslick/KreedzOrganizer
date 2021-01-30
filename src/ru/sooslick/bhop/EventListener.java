@@ -14,7 +14,12 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
-import org.bukkit.event.player.*;
+import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.server.TabCompleteEvent;
 import ru.sooslick.bhop.command.BhopCommandListener;
 import ru.sooslick.bhop.command.BhopEditCommandListener;
@@ -224,7 +229,7 @@ public class EventListener implements Listener {
 
     @EventHandler
     public void onTabComplete(TabCompleteEvent e) {
-        String[] args = e.getBuffer().replaceAll("[ ]+", " ").trim().split(" ");
+        String[] args = e.getBuffer().replaceFirst("/", "").replaceAll("[ ]+", " ").trim().split(" ");
         if (args.length == 0)
             return;
         if (args[0].equalsIgnoreCase(BhopCommandListener.COMMAND_BHOP) || args[0].equalsIgnoreCase(BhopCommandListener.COMMAND_BHOP_ALIAS)) {

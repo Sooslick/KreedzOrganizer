@@ -9,7 +9,13 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.server.TabCompleteEvent;
 import org.jetbrains.annotations.NotNull;
-import ru.sooslick.bhop.*;
+import ru.sooslick.bhop.BhopAdmin;
+import ru.sooslick.bhop.BhopAdminManager;
+import ru.sooslick.bhop.BhopCheckpoint;
+import ru.sooslick.bhop.BhopLevel;
+import ru.sooslick.bhop.BhopPermissions;
+import ru.sooslick.bhop.Engine;
+import ru.sooslick.bhop.TriggerType;
 import ru.sooslick.bhop.util.BhopUtil;
 
 import java.util.Arrays;
@@ -325,6 +331,9 @@ public class BhopEditCommandListener implements CommandExecutor {
                     e.setCompletions(Arrays.asList(COMMAND_CREATE, COMMAND_EDIT, COMMAND_DELETE, COMMAND_SET,
                             COMMAND_SAVE, COMMAND_DISCARD));
                     return;
+                default:
+                    tabComplete(e, Arrays.copyOf(args, args.length-1));
+                    return;
             }
         }
         if (args.length == 3) {
@@ -343,8 +352,10 @@ public class BhopEditCommandListener implements CommandExecutor {
                     return;
                 }
             }
+            tabComplete(e, Arrays.copyOf(args, args.length-1));
+            return;
         }
-        if (args.length == 4 && args[1].equalsIgnoreCase(COMMAND_CHECKPOINT) && args[2].equalsIgnoreCase(COMMAND_SET) && args[3].equalsIgnoreCase(SET_TRIGGER_TYPE)) {
+        if (args.length >= 4 && args[1].equalsIgnoreCase(COMMAND_CHECKPOINT) && args[2].equalsIgnoreCase(COMMAND_SET) && args[3].equalsIgnoreCase(SET_TRIGGER_TYPE)) {
             e.setCompletions(Arrays.asList("movement", "interact"));
         }
     }

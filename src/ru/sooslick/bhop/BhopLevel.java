@@ -49,7 +49,7 @@ public class BhopLevel {
         } catch (Exception e) {
             // another exceptions, especially rg not found
             Bukkit.getLogger().warning("Cannot assign region to bhop level " + name + ", region - " + rgName
-            + "\n" + e.getMessage());
+                    + "\n" + e.getMessage());
             return false;
         }
     }
@@ -138,8 +138,9 @@ public class BhopLevel {
                 sender.sendMessage("§6" + pos.getAndIncrement() + ":§e " + rec.getName() + " §7(" + rec.formatTime() + ")");
         });
 
-        if (!top10.get())
-            sender.sendMessage("§a?: " + own.getName() + " (" + own.formatTime() + ")");
+        if (own != null)
+            if (!top10.get())
+                sender.sendMessage("§a?: " + own.getName() + " (" + own.formatTime() + ")");
     }
 
     public void setChanged() {
