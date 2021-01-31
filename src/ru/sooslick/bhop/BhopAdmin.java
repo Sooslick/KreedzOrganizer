@@ -116,7 +116,7 @@ public class BhopAdmin {
         //check region
         if (level.getBhopRegion() != null) {
             if (level.getBhopRegion().getBound1().getWorld() != loc.getWorld()) {
-                admin.sendMessage("§cBounding are located in different world, cannot set start");
+                admin.sendMessage("§cBounds are located in different worlds, cannot set start");
                 return;
             }
         }
@@ -130,7 +130,7 @@ public class BhopAdmin {
         //check region
         if (level.getBhopRegion() != null) {
             if (level.getBhopRegion().getBound1().getWorld() != loc.getWorld()) {
-                admin.sendMessage("§cBounding are located in different world, cannot set start");
+                admin.sendMessage("§cBounds are located in different worlds, cannot set start");
                 return;
             }
         }
@@ -163,17 +163,17 @@ public class BhopAdmin {
         if (start == null)
             errors.add("§cStart position not specified");
         else if (!level.isInside(start))
-            errors.add("§cStart position is outside of level");
+            errors.add("§cStart position outside of level");
         Location finish = level.getFinish();
         if (finish == null)
             errors.add("§cFinish position not specified");
         else if (!level.isInside(finish))
-            errors.add("§cFinish position is outside of level");
+            errors.add("§cFinish position outside of level");
         for (BhopCheckpoint bhcp : level.getCheckpoints()) {
             if (!level.isInside(bhcp.getLoadLocation()))
-                errors.add("§cLoad position of checkpoint " + bhcp.getName() + " is outside of level");
+                errors.add("§cLoad position of checkpoint " + bhcp.getName() + " outside of level");
             if (!level.isInside(bhcp.getTriggerLocation()))
-                errors.add("§cTrigger position of checkpoint " + bhcp.getName() + " is outside of level");
+                errors.add("§cTrigger position of checkpoint " + bhcp.getName() + " outside of level");
         }
         //print errors list
         if (errors.size() > 0) {
@@ -218,20 +218,20 @@ public class BhopAdmin {
         }
         BhopCheckpoint fcp = level.getCheckpoint(name);
         if (fcp == null) {
-            admin.sendMessage("§cCheckpoint not exists, use §6/bhopmanage checkpoint create " + name + " §cinstead.");
+            admin.sendMessage("§cCheckpoint does not exist, use §6/bhopmanage checkpoint create " + name + " §cinstead.");
             return;
         }
         cpName = fcp.getName();
         cpLoad = fcp.getLoadLocation();
         cpTrigger = fcp.getTriggerLocation();
         cpType = fcp.getTriggerType();
-        admin.sendMessage("§eStarted editing checkpoint " + cpName + ", now set trigger and load positions");
+        admin.sendMessage("§eStarted editing checkpoint " + cpName);
     }
 
     public void deleteCheckpoint(String name) {
         BhopCheckpoint fcp = level.getCheckpoint(name);
         if (fcp == null) {
-            admin.sendMessage("§cCheckpoint not exists.");
+            admin.sendMessage("§cCheckpoint does not exist.");
             return;
         }
         level.getCheckpoints().remove(fcp);
@@ -313,7 +313,7 @@ public class BhopAdmin {
     }
 
     public void discardCheckpoint() {
-        admin.sendMessage("§eDiscard changes on checkpoint " + cpName);
+        admin.sendMessage("§eDiscarded changes on checkpoint " + cpName);
         cpName = null;
         cpLoad = null;
         cpTrigger = null;

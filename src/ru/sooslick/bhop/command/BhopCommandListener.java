@@ -34,8 +34,8 @@ public class BhopCommandListener implements CommandExecutor {
     private static final String COMMAND_STAT = "stat";
     private static final String COMMAND_HELP = "help";
 
-    private static final String AVAILABLE_CHECKPOINTS = "§eAvailable points:";
-    private static final String AVAILABLE_LEVELS = "§eAvailable levels:";
+    private static final String AVAILABLE_CHECKPOINTS = "§eAvailable points: ";
+    private static final String AVAILABLE_LEVELS = "§eAvailable levels: ";
     private static final String CHECKPOINT_EXISTS = "§cCheckpoint %s exists.";
     private static final String CHECKPOINT_NOT_FOUND = "§cUnknown checkpoint.";
     private static final String CHECKPOINT_REQUIRED = "§cCheckpoint name required.";
@@ -47,7 +47,7 @@ public class BhopCommandListener implements CommandExecutor {
     private static final String LEVEL_STARTED = "§eLevel %s started";
     private static final String NOT_PLAYING = "§cYou are not in-game";
     private static final String NOT_PRACTICE = "§cYou are not in practice mode. Use /bhop practice <level name> to enable this feature";
-    private static final String NO_PERMISSION = "§cYou have not permissions";
+    private static final String NO_PERMISSION = "§cYou don't have permission";
     private static final String USAGE_SAVE = "§c/bhop save <checkpoint name>";
 
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
@@ -62,7 +62,7 @@ public class BhopCommandListener implements CommandExecutor {
                     if (args.length > 1) {
                         BhopLevel bhl = engine.getBhopLevel(args[1]);
                         if (bhl == null)
-                            return sendMessageAndReturn(sender, "§cAvailable levels: " + engine.getBhopLevels());
+                            return sendMessageAndReturn(sender, AVAILABLE_LEVELS + engine.getBhopLevels());
                         else
                             return sendMessageAndReturn(sender, bhl.getCheckpoints().stream().map(BhopCheckpoint::getName).collect(Collectors.joining()));
                     }
@@ -80,7 +80,7 @@ public class BhopCommandListener implements CommandExecutor {
                         return sendMessageAndReturn(sender, "§c/bhop leaderboards <level name>");
                     BhopLevel bhl = engine.getBhopLevel(args[1]);
                     if (bhl == null)
-                        return sendMessageAndReturn(sender, "§cAvailable levels: " + engine.getBhopLevels());
+                        return sendMessageAndReturn(sender, AVAILABLE_LEVELS + engine.getBhopLevels());
                     bhl.printLeaderboard(sender);
                     return true;
 

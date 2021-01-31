@@ -1,6 +1,5 @@
 package ru.sooslick.bhop;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -110,10 +109,10 @@ public class EventListener implements Listener {
         File f = new File(Engine.INVENTORY_PATH + e.getPlayer().getName() + Engine.YAML_EXTENSION);
         if (f.exists()) {
             if (!InventoryUtil.invFromFile(p)) {
-                Bukkit.getLogger().warning("Cannot restore player's inventory, player: " + p.getName());
+                Engine.LOG.warning("Cannot restore player's inventory, player: " + p.getName());
                 p.sendMessage("§cOops, something went wrong. Can't restore your inventory, please contact server admin");
             }
-            Bukkit.getLogger().info("Restored inventory of player " + e.getPlayer().getName());
+            Engine.LOG.info("Restored inventory of player " + e.getPlayer().getName());
         }
 
         //check dc

@@ -1,6 +1,5 @@
 package ru.sooslick.bhop.util;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -21,7 +20,7 @@ public class InventoryUtil {
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public static boolean invToFile(Player p) {
-        Bukkit.getLogger().info("saving inventory of player " + p.getName());
+        Engine.LOG.info("saving inventory of player " + p.getName());
         //store inv contents to file
         File f = new File(Engine.INVENTORY_PATH + p.getName() + Engine.YAML_EXTENSION);
         File backup = new File(Engine.INVENTORY_BACKUP_PATH + sdf.format(new Date()) + p.getName() + Engine.YAML_EXTENSION);
@@ -46,7 +45,7 @@ public class InventoryUtil {
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public static boolean invFromFile(Player p) {
-        Bukkit.getLogger().info("loading inventory of player " + p.getName());
+        Engine.LOG.info("loading inventory of player " + p.getName());
         File f = new File(Engine.INVENTORY_PATH + p.getName() + Engine.YAML_EXTENSION);
         YamlConfiguration yaml = new YamlConfiguration();
         try {
@@ -58,7 +57,7 @@ public class InventoryUtil {
         try {
             content = ((List<ItemStack>) yaml.get("inventory.content")).toArray(new ItemStack[0]);
         } catch (Exception e) {
-            Bukkit.getLogger().warning("Error while attempt to restore player's inventory\n" + e.getMessage());
+            Engine.LOG.warning("Error while attempt to restore player's inventory\n" + e.getMessage());
             return false;
         }
         if (!f.delete()) {

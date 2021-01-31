@@ -1,6 +1,5 @@
 package ru.sooslick.bhop;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
@@ -48,7 +47,7 @@ public class BhopLevel {
             throw e;
         } catch (Exception e) {
             // another exceptions, especially rg not found
-            Bukkit.getLogger().warning("Cannot assign region to bhop level " + name + ", region - " + rgName
+            Engine.LOG.warning("Cannot assign region to bhop level " + name + ", region - " + rgName
                     + "\n" + e.getMessage());
             return false;
         }

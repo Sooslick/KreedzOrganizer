@@ -7,9 +7,9 @@ import com.sk89q.worldguard.protection.regions.GlobalProtectedRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.sk89q.worldguard.protection.regions.RegionContainer;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
+import ru.sooslick.bhop.Engine;
 import ru.sooslick.bhop.exception.WorldGuardException;
 
 public class WorldGuardRegion implements BhopRegion {
@@ -29,7 +29,7 @@ public class WorldGuardRegion implements BhopRegion {
             if (rg instanceof GlobalProtectedRegion)
                 throw new Exception("Global region is not applicable");
             if (rg instanceof ProtectedPolygonalRegion)
-                Bukkit.getLogger().warning("Polygonal region may affect performance");
+                Engine.LOG.warning("Polygonal region may affect performance");
             region = rg;
         } catch (NoClassDefFoundError e) {
             throw new WorldGuardException();

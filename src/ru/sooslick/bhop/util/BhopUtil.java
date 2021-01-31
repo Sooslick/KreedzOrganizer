@@ -1,8 +1,8 @@
 package ru.sooslick.bhop.util;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
+import ru.sooslick.bhop.Engine;
 
 public class BhopUtil {
 
@@ -31,7 +31,7 @@ public class BhopUtil {
                     Float.parseFloat(coords[3]),
                     Float.parseFloat(coords[4]));
         else {
-            Bukkit.getLogger().warning("stringToLocation: wrong Location format | " + s);
+            Engine.LOG.warning("stringToLocation: wrong Location format | " + s);
             return null;
         }
     }

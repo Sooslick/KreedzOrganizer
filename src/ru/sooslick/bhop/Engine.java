@@ -262,11 +262,11 @@ public class Engine extends JavaPlugin {
                     entries.getAndIncrement();
                 }));
         if (entries.get() == 0)
-            sender.sendMessage("§cNo stat found for player " + name);
+            sender.sendMessage("§cNo stats found for player " + name);
     }
 
     private void reload() {
-        LOG = Bukkit.getLogger();
+        LOG = getLogger();
         LOG.info("Bhop init");
 
         //check plugin directory. Create if not exists

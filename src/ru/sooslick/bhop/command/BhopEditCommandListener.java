@@ -44,7 +44,7 @@ public class BhopEditCommandListener implements CommandExecutor {
     private static final String SET_TRIGGER = "trigger";
     private static final String SET_TRIGGER_TYPE = "triggertype";
 
-    private static final String NO_PERMISSION = "§cYou have not permissions";
+    private static final String NO_PERMISSION = "§cYou don't have permission";
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
@@ -245,7 +245,7 @@ public class BhopEditCommandListener implements CommandExecutor {
                     sender.sendMessage("§eCreate §f- create a new level");
                     sender.sendMessage("§eEdit §f- edit an existing level");
                     sender.sendMessage("§eDelete §f- delete a level");
-                    sender.sendMessage("§eSet §f- change one of level's parameter");
+                    sender.sendMessage("§eSet §f- change one of level's parameters");
                     sender.sendMessage("§eCheckpoint §f- manage level's checkpoints");
                     sender.sendMessage("§eSave §f- save edited level");
                     sender.sendMessage("§eDiscard §f- discard any changes");
@@ -261,7 +261,7 @@ public class BhopEditCommandListener implements CommandExecutor {
                         sender.sendMessage("§eBound2 §f- set second bounding for level's area");
                         sender.sendMessage("§eStart §f- set start position for level");
                         sender.sendMessage("§eFinish §f- set finish position for level");
-                        sender.sendMessage("§eTriggerType §f- set action for finish triggering");
+                        sender.sendMessage("§eTriggerType §f- set action for triggering level completion");
                         return true;
                     case COMMAND_CHECKPOINT:
                         sender.sendMessage("§c/bhopmanage checkpoint <command> <parameters>");
@@ -269,7 +269,7 @@ public class BhopEditCommandListener implements CommandExecutor {
                         sender.sendMessage("§eCreate §f- create a new checkpoint");
                         sender.sendMessage("§eEdit §f- edit an existing checkpoint");
                         sender.sendMessage("§eDelete §f- delete a checkpoint");
-                        sender.sendMessage("§eSet §f- change one of checkpoint's parameter");
+                        sender.sendMessage("§eSet §f- change one of checkpoint's parameters");
                         sender.sendMessage("§eSet Load §f- set load position for checkpoint");
                         sender.sendMessage("§eSet Trigger §f- set trigger position that opens the checkpoint");
                         sender.sendMessage("§eSet TriggerType §f- set action required for opening this checkpoint");
