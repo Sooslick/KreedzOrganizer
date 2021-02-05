@@ -233,7 +233,8 @@ public class Engine extends JavaPlugin {
     }
 
     public void playerCheckpointEvent(BhopPlayer bhpl, BhopCheckpoint cp) {
-        LOG.info("Bhop player checkpoint event triggered");
+        //move event floods to the console
+        //LOG.info("Bhop player checkpoint event triggered");
         if (bhpl == null || cp == null)
             return;
         if (bhpl.addCheckpoint(cp))
@@ -267,7 +268,7 @@ public class Engine extends JavaPlugin {
 
     private void reload() {
         LOG = getLogger();
-        LOG.info("Bhop init");
+        LOG.info("Bhop reload");
 
         //check plugin directory. Create if not exists
         boolean folderCreated = false;
@@ -416,6 +417,14 @@ public class Engine extends JavaPlugin {
         assert cmd != null;
         cmd.setExecutor(new BhopEditCommandListener());
 
+        //check active players
+        if (activePlayers != null && activePlayers.size() > 0) {
+            activePlayers.forEach(bhpl -> {
+                this.playerExitEvent(bhpl);
+                bhpl.getPlayer().sendMessage("§4Oops, Bhop plugin was reloaded causing interrupting your session.");
+            });
+        }
+
         //init other variables
         activePlayers = new ArrayList<>();
         dcPlayers = new ArrayList<>();
@@ -512,5 +521,6 @@ public class Engine extends JavaPlugin {
     //  region changes detection
     //  sign records
     //  level owner
+    //  test level
     //  code refactoring
 }
