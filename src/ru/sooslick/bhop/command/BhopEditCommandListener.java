@@ -291,14 +291,29 @@ public class BhopEditCommandListener implements CommandExecutor {
     }
 
     private Location parseLocation(CommandSender sender, String[] args, boolean checkpoint) {
-        int from = checkpoint ? 4 : 3;
+        Location loc = null;
+        int from = checkpoint ? 3 : 2;
+        String parse = BhopUtil.join(", ", args, from).replaceAll(",,", ",");
         //try to get loc from args
         if (args.length > from)
-            return BhopUtil.stringToLocation(Bukkit.getWorld(args[2]), BhopUtil.join(", ", args, from));
-            //else try to get loc from playerpos
+            loc = BhopUtil.stringToLocation(parse);
+        //else try to get loc from playerpos
         else if (sender instanceof Player)
-            return ((Player) sender).getLocation();
-        return null;
+            loc = ((Player) sender).getLocation();
+
+        //validate
+        if (loc == null) {
+            sender.sendMessage("§cWrong location format | " + BhopUtil.join(" ", args, from)
+                    + "\nCorrect format is §6[world] <x> <y> <z> [yaw] [pitch]");
+            return loc;
+        }
+
+        // fix world if missing
+        if (sender instanceof Player && loc.getWorld() == null)
+            loc.setWorld(((Player) sender).getWorld());
+
+        Engine.getInstance().getLogger().info("Requested location: " + BhopUtil.locationToString(loc));
+        return loc;
     }
 
     @SuppressWarnings("SameReturnValue")

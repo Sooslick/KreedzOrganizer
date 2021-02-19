@@ -1,8 +1,11 @@
 package ru.sooslick.bhop.util;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import ru.sooslick.bhop.Engine;
+
+import java.util.Arrays;
 
 public class BhopUtil {
 
@@ -11,27 +14,36 @@ public class BhopUtil {
 
     public static Location stringToLocation(String s) {
         String[] coords = s.split(COMMA);
-        if (coords.length == 3)
-        return new Location(null,
-                Double.parseDouble(coords[0]),
-                Double.parseDouble(coords[1]),
-                Double.parseDouble(coords[2]));
-        else if (coords.length == 4)
-            return new Location(null,
-                    Double.parseDouble(coords[0]),
-                    Double.parseDouble(coords[1]),
-                    Double.parseDouble(coords[2]),
-                    Float.parseFloat(coords[3]),
-                    0);
-        else if (coords.length == 5)
-            return new Location(null,
-                    Double.parseDouble(coords[0]),
-                    Double.parseDouble(coords[1]),
-                    Double.parseDouble(coords[2]),
-                    Float.parseFloat(coords[3]),
-                    Float.parseFloat(coords[4]));
-        else {
-            Engine.LOG.warning("stringToLocation: wrong Location format | " + s);
+        //try to get world
+        World world = Bukkit.getWorld(coords[0]);
+        if (world != null)
+            coords = Arrays.copyOfRange(coords, 1, coords.length);
+        try {
+            if (coords.length == 3)
+                return new Location(world,
+                        Double.parseDouble(coords[0]),
+                        Double.parseDouble(coords[1]),
+                        Double.parseDouble(coords[2]));
+            else if (coords.length == 4)
+                return new Location(world,
+                        Double.parseDouble(coords[0]),
+                        Double.parseDouble(coords[1]),
+                        Double.parseDouble(coords[2]),
+                        Float.parseFloat(coords[3]),
+                        0);
+            else if (coords.length == 5)
+                return new Location(world,
+                        Double.parseDouble(coords[0]),
+                        Double.parseDouble(coords[1]),
+                        Double.parseDouble(coords[2]),
+                        Float.parseFloat(coords[3]),
+                        Float.parseFloat(coords[4]));
+            else {
+                Engine.LOG.warning("stringToLocation: wrong Location format: " + s);
+                return null;
+            }
+        } catch (Exception e) {
+            Engine.LOG.warning("stringToLocation: wrong Location format: " + s);
             return null;
         }
     }
@@ -45,15 +57,15 @@ public class BhopUtil {
     }
 
     public static String locationToString(Location l) {
-        return l.getBlockX() + COMMA + l.getBlockY() + COMMA + l.getBlockZ() + COMMA
-                + l.getYaw() + COMMA + l.getPitch();
+        return l.getX() + COMMA + l.getY() + COMMA + l.getZ() + COMMA
+             + l.getYaw() + COMMA + l.getPitch();
     }
 
     public static String join(String delimiter, String[] args, int from) {
         StringBuilder sb = new StringBuilder();
         for (int i = from; i < args.length; i++) {
             sb.append(args[i]);
-            if (i+1 < args.length) sb.append(delimiter);
+            if (i + 1 < args.length) sb.append(delimiter);
         }
         return sb.toString();
     }
@@ -94,6 +106,6 @@ public class BhopUtil {
     }
 
     public static double diag(double dx, double dy, double dz) {
-        return Math.sqrt(dx*dx + dy*dy + dz*dz);
+        return Math.sqrt(dx * dx + dy * dy + dz * dz);
     }
 }

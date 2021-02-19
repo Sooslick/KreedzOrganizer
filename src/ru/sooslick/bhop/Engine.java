@@ -27,6 +27,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -61,10 +62,14 @@ public class Engine extends JavaPlugin {
     private List<BhopPlayer> dcPlayers;
     private int bhopTimerId = 0;
     private boolean useWg = false;
+    private boolean cfgChanged = false;
 
     private final Runnable bhopTimerProcessor = () -> {
-        for (BhopPlayer bhpl : activePlayers.toArray(new BhopPlayer[0])) {
-            bhpl.tick();
+        Iterator<BhopPlayer> i = activePlayers.iterator();
+        //noinspection WhileLoopReplaceableByForEach
+        while (i.hasNext()) {
+            BhopPlayer bhpl = i.next();
+            bhpl.tick();   //tick may cause player exit event where activePlayers is modified
         }
     };
 
@@ -333,7 +338,7 @@ public class Engine extends JavaPlugin {
                 BhopLevel bhopLevel = new BhopLevel(levelName);
                 World w = Bukkit.getWorld(csParams.getString("world"));
                 boolean rgSuccess = false;
-                if (useWg) {
+                if (useWg && csParams.contains("region")) {
                     try {
                         rgSuccess = bhopLevel.setRegion(w, csParams.getString("region"));
                     } catch (WorldGuardException e) {
@@ -437,6 +442,10 @@ public class Engine extends JavaPlugin {
     }
 
     private void saveCfg() {
+        if (!cfgChanged) {
+            LOG.info("No changes in main config");
+            return;
+        }
         List<String> levelNames = new LinkedList<>();
         levels.forEach(level -> levelNames.add(level.getName()));
         try {
@@ -454,6 +463,7 @@ public class Engine extends JavaPlugin {
         if (!level.isChanged())
             return;
         LOG.info("Saving changes in level " + level.getName());
+        cfgChanged = true;
         try {
             YamlConfiguration levelCfg = new YamlConfiguration();
             levelCfg.set("world", level.getStartPosition().getWorld().getName());
@@ -505,6 +515,7 @@ public class Engine extends JavaPlugin {
 
     public void deleteLevel(BhopLevel bhl) {
         if (levels.remove(bhl)) {
+            cfgChanged = true;
             if (bhl.getFile().delete())
                 LOG.info("Removed level " + bhl.getName());
             else
@@ -523,4 +534,5 @@ public class Engine extends JavaPlugin {
     //  level owner
     //  test level
     //  code refactoring
+    //  new timer: realtime / ticks
 }

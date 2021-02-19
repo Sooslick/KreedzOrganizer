@@ -52,9 +52,10 @@ public class BhopAdminManager {
             sender.sendMessage("§cYou cannot undo this operation. Type §e/bhopmanage delete " + bhl.getName() + " sure §cfor confirmation");
             return;
         }
-        if (confirm)
+        if (confirm) {
             Engine.getInstance().deleteLevel(bhl);
-        else
+            sender.sendMessage("§eDeleted level " + bhl.getName());
+        } else
             sender.sendMessage("§cYou cannot undo this operation. Type §e/bhopmanage delete " + bhl.getName() + " sure §cfor confirmation");
     }
 
@@ -135,15 +136,16 @@ public class BhopAdminManager {
             sender.sendMessage("§cYou cannot undo this operation. Type §e/bhopmanage discard sure §cfor confirmation");
             return;
         }
-        if (pc.getAction() != BhopAction.DELETE) {
+        if (pc.getAction() != BhopAction.DISCARD) {
             pc.deactivate();
             pendingCommands.add(new PendingCommand(sender, BhopAction.DISCARD));
             sender.sendMessage("§cYou cannot undo this operation. Type §e/bhopmanage discard sure §cfor confirmation");
             return;
         }
-        if (confirm)
+        if (confirm) {
             activeAdmins.remove(admin);
-        else
+            sender.sendMessage("§eExited editing mode.");
+        } else
             sender.sendMessage("§cYou cannot undo this operation. Type §e/bhopmanage discard sure §cfor confirmation");
     }
 
@@ -155,16 +157,17 @@ public class BhopAdminManager {
             sender.sendMessage("§cYou cannot undo this operation. Type §e/bhopmanage reset " + level.getName() + " sure §cfor confirmation");
             return;
         }
-        if (pc.getAction() != BhopAction.DELETE) {
+        if (pc.getAction() != BhopAction.RESET) {
             Engine.LOG.info("Reset score: action of pending command is not delete. Deactivate old and create new pending command");
             pc.deactivate();
             pendingCommands.add(new PendingCommand(sender, BhopAction.RESET));
             sender.sendMessage("§cYou cannot undo this operation. Type §e/bhopmanage reset " + level.getName() + " sure §cfor confirmation");
             return;
         }
-        if (confirm)
+        if (confirm) {
             level.getRecords().clear();
-        else
+            sender.sendMessage("§eCleared level's leaderboard");
+        } else
             sender.sendMessage("§cYou cannot undo this operation. Type §e/bhopmanage reset " + level.getName() + " sure §cfor confirmation");
     }
 
