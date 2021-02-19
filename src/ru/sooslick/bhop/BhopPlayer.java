@@ -60,7 +60,7 @@ public class BhopPlayer {
     }
 
     public String formatCheckpoints() {
-        return checkpoints.stream().map(BhopCheckpoint::getName).collect(Collectors.joining());
+        return checkpoints.stream().map(BhopCheckpoint::getName).collect(Collectors.joining(", "));
     }
 
     public Location getComebackLocation() {
@@ -89,7 +89,7 @@ public class BhopPlayer {
         return cheats;
     }
 
-    public void tick() {
+    public boolean tickAndCheckFlee() {
         timer++;
         if (level.isInside(player.getLocation())) {
             if (fleeTimer > 0) {
@@ -103,10 +103,9 @@ public class BhopPlayer {
             }
             if (fleeTimer % 5 == 0) {
                 player.sendMessage("§c" + (15 - fleeTimer) + " seconds to exit");
-                if (fleeTimer >= 15) {
-                    Engine.getInstance().playerExitEvent(this);
-                }
+                return fleeTimer >= 15;
             }
         }
+        return false;
     }
 }

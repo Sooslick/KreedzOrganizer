@@ -64,7 +64,7 @@ public class BhopCommandListener implements CommandExecutor {
                         if (bhl == null)
                             return sendMessageAndReturn(sender, AVAILABLE_LEVELS + engine.getBhopLevels());
                         else
-                            return sendMessageAndReturn(sender, bhl.getCheckpoints().stream().map(BhopCheckpoint::getName).collect(Collectors.joining()));
+                            return sendMessageAndReturn(sender, bhl.getCheckpoints().stream().map(BhopCheckpoint::getName).collect(Collectors.joining(", ")));
                     }
                     //format checkpoints list for current player, otherwise prompt for level name
                     BhopPlayer bhpl = null;

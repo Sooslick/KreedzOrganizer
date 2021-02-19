@@ -27,7 +27,6 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -65,12 +64,10 @@ public class Engine extends JavaPlugin {
     private boolean cfgChanged = false;
 
     private final Runnable bhopTimerProcessor = () -> {
-        Iterator<BhopPlayer> i = activePlayers.iterator();
-        //noinspection WhileLoopReplaceableByForEach
-        while (i.hasNext()) {
-            BhopPlayer bhpl = i.next();
-            bhpl.tick();   //tick may cause player exit event where activePlayers is modified
-        }
+        List<BhopPlayer> fleePlayers = activePlayers.stream()
+                .filter(BhopPlayer::tickAndCheckFlee)
+                .collect(Collectors.toList());
+        fleePlayers.forEach(this::playerExitEvent);
     };
 
     public static Engine getInstance() {
