@@ -4,4 +4,5 @@ public class BhopPermissions {
     public static final String BYPASS = "bhop.bypass";
     public static final String EDIT = "bhop.edit";
     public static final String GAMEPLAY = "bhop.gameplay";
+    public static final String RELOAD = "bhop.reload";
 }

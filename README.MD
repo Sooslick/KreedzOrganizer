@@ -1,15 +1,29 @@
 MINECRAFT PARCOUR ORGANIZER
 =
 
-Плагин для серверов Spigot / Bukkit для огранизации уровней с паркуром (и не только).
+The plugin for Spigot-based minecraft servers for configuring parcour levels or racetracks
 
-Что плагин умеет делать:
+Features
 -
-- Настройка точек респа, финиша и чекпоинтов
-- Подсчет времени прохождения уровня
-- Отключение урона и голода на уровне
-- Эффект невидимости для игроков на уровне
-- Очистка инвентаря в начале игры и его восстановление в конце
-- Всякая всячина
+- Setting up start and finish points and creating checkpoints
+- Simple stopwatch
+- Disabling damage and hunger on level
+- Disabling players' collision and visiblity on level
+- Removing inventory while playing and restoring it after exiting
 
-WIP
+Setup:
+-
+- Put the downloaded .jar file in your server's /plugins folder
+- Restart your server
+- Configure levels and config.yml in /plugins/BHop or in-game
+
+Permissions
+-
+- `bhop.gameplay` - access to */bhop* command and main gameplay
+- `bhop.edit` - access to */bhopmanage* command and level management
+- `bhop.bypass` - permission to build on existing levels
+- `bhop.reload` - access to */bhopmanage reload* command for reloading config and levels
+
+Demo
+-
+*missing youtube link*

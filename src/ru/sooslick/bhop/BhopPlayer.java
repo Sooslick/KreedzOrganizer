@@ -1,7 +1,10 @@
 package ru.sooslick.bhop;
 
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -17,6 +20,8 @@ public class BhopPlayer {
     private Location dcLocation;
     private int fleeTimer;
     private boolean cheats;
+    private final GameMode savedGm;
+    private final boolean savedCollidable;
 
     public BhopPlayer(Player p, BhopLevel bl) {
         player = p;
@@ -27,6 +32,11 @@ public class BhopPlayer {
         comeback = player.getLocation();
         dcLocation = level.getStartPosition();
         cheats = false;
+        savedGm = p.getGameMode();
+        savedCollidable = p.isCollidable();
+
+        player.setCollidable(false);
+        player.getActivePotionEffects().clear();
     }
 
     public void restart(BhopLevel bl) {
@@ -35,6 +45,12 @@ public class BhopPlayer {
         fleeTimer = 0;
         checkpoints.clear();
         dcLocation = level.getStartPosition();
+    }
+
+    public void exit() {
+        player.teleport(getComebackLocation());
+        player.setGameMode(savedGm);
+        player.setCollidable(savedCollidable);
     }
 
     public Player getPlayer() {
@@ -91,6 +107,8 @@ public class BhopPlayer {
 
     public boolean tickAndCheckFlee() {
         timer++;
+        if (timer % 11 == 1)
+            player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 228, 1));
         if (level.isInside(player.getLocation())) {
             if (fleeTimer > 0) {
                 if (fleeTimer > 5)

@@ -1,11 +1,13 @@
 package ru.sooslick.bhop.util;
 
+import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.meta.LeatherArmorMeta;
 import ru.sooslick.bhop.Engine;
 
 import java.io.File;
@@ -13,10 +15,12 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 public class InventoryUtil {
 
     private static final SimpleDateFormat sdf = new SimpleDateFormat("yyMMddHHmmssSSS");
+    private static final Random random = new Random();
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public static boolean invToFile(Player p) {
@@ -40,6 +44,12 @@ public class InventoryUtil {
         inv.clear();
         ItemStack is = new ItemStack(Material.GOLDEN_CARROT, 4);
         inv.addItem(is);
+        is = new ItemStack(Material.LEATHER_BOOTS);
+        LeatherArmorMeta am = (LeatherArmorMeta) is.getItemMeta();
+        if (am != null)
+            am.setColor(Color.fromRGB(random.nextInt(16777216)));
+        is.setItemMeta(am);
+        inv.setBoots(is);
         return true;
     }
 

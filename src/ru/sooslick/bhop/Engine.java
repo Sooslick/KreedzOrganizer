@@ -207,7 +207,8 @@ public class Engine extends JavaPlugin {
             LOG.warning("Cannot restore player's inventory, player: " + p.getName());
             p.sendMessage("§cOops, something went wrong. Can't restore your inventory, please contact server admin");
         }
-        p.teleport(bhpl.getComebackLocation());
+
+        bhpl.exit();
     }
 
     public void playerFinishEvent(BhopPlayer bhpl) {
@@ -268,7 +269,7 @@ public class Engine extends JavaPlugin {
             sender.sendMessage("§cNo stats found for player " + name);
     }
 
-    private void reload() {
+    public void reload() {
         LOG = getLogger();
         LOG.info("Bhop reload");
 
@@ -317,6 +318,7 @@ public class Engine extends JavaPlugin {
         }
 
         //load and read config
+        reloadConfig();
         FileConfiguration cfg = getConfig();
         useWg = cfg.getBoolean(CFG_USEWG, false);
         List<?> csLevels = cfg.getList(CFG_LEVELS);
@@ -379,7 +381,6 @@ public class Engine extends JavaPlugin {
             } catch (Exception e) {
                 LOG.warning("Error occurred while reading level " + levelName);
                 LOG.warning(e.getMessage());
-                e.printStackTrace();
             }
         }
         LOG.info("Loaded " + levels.size() + " Bhop levels");
@@ -421,7 +422,8 @@ public class Engine extends JavaPlugin {
 
         //check active players
         if (activePlayers != null && activePlayers.size() > 0) {
-            activePlayers.forEach(bhpl -> {
+            List<BhopPlayer> copy = new LinkedList<BhopPlayer>(activePlayers);
+            copy.forEach(bhpl -> {
                 this.playerExitEvent(bhpl);
                 bhpl.getPlayer().sendMessage("§4Oops, Bhop plugin was reloaded causing interrupting your session.");
             });
@@ -531,5 +533,5 @@ public class Engine extends JavaPlugin {
     //  level owner
     //  test level
     //  code refactoring
-    //  new timer: realtime / ticks
+    //  new timer: realtime / ticks + scoreboard
 }

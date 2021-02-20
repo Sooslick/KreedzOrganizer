@@ -31,6 +31,7 @@ public class BhopEditCommandListener implements CommandExecutor {
     private static final String COMMAND_DISCARD = "discard";
     private static final String COMMAND_EDIT = "edit";
     private static final String COMMAND_HELP = "help";
+    private static final String COMMAND_RELOAD = "reload";
     private static final String COMMAND_RESET = "reset";
     private static final String COMMAND_SAVE = "save";
     private static final String COMMAND_SET = "set";
@@ -48,10 +49,19 @@ public class BhopEditCommandListener implements CommandExecutor {
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
-        if (!sender.hasPermission(BhopPermissions.EDIT))
-            return sendMessageAndReturn(sender, NO_PERMISSION);
         if (args.length == 0)
             return sendMessageAndReturn(sender, command.getUsage());
+
+        if (args[0].toLowerCase().equals(COMMAND_RELOAD)) {
+            if (!sender.hasPermission(BhopPermissions.RELOAD))
+                return sendMessageAndReturn(sender, NO_PERMISSION);
+            Engine.getInstance().reload();
+            sender.sendMessage("§eReloaded");
+            return true;
+        }
+
+        if (!sender.hasPermission(BhopPermissions.EDIT))
+            return sendMessageAndReturn(sender, NO_PERMISSION);
 
         switch (args[0].toLowerCase()) {
             case COMMAND_CREATE:
@@ -347,7 +357,7 @@ public class BhopEditCommandListener implements CommandExecutor {
                             COMMAND_SAVE, COMMAND_DISCARD));
                     return;
                 default:
-                    tabComplete(e, Arrays.copyOf(args, args.length-1));
+                    tabComplete(e, Arrays.copyOf(args, args.length - 1));
                     return;
             }
         }
@@ -367,7 +377,7 @@ public class BhopEditCommandListener implements CommandExecutor {
                     return;
                 }
             }
-            tabComplete(e, Arrays.copyOf(args, args.length-1));
+            tabComplete(e, Arrays.copyOf(args, args.length - 1));
             return;
         }
         if (args.length >= 4 && args[1].equalsIgnoreCase(COMMAND_CHECKPOINT) && args[2].equalsIgnoreCase(COMMAND_SET) && args[3].equalsIgnoreCase(SET_TRIGGER_TYPE)) {

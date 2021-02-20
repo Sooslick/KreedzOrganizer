@@ -19,7 +19,7 @@ public class BhopAdminManager {
 
     public static void init() {
         if (activeAdmins != null && activeAdmins.size() > 0) {
-            activeAdmins.forEach(admin -> admin.getAdmin().sendMessage("§4Oops, plugin was reloaded, and you edit session was lost."));
+            activeAdmins.forEach(admin -> admin.getAdmin().sendMessage("§4Oops, plugin was reloaded, and your edit session was lost."));
         }
 
         pendingCommands = new LinkedList<>();
