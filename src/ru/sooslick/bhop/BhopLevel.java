@@ -126,6 +126,10 @@ public class BhopLevel {
     }
 
     public void printLeaderboard(CommandSender sender) {
+        if (records.size() == 0) {
+            sender.sendMessage("§7Empty leaderboard");
+            return;
+        }
         BhopRecord own = getPlayerRecord(sender.getName());
         AtomicBoolean top10 = new AtomicBoolean(false);
         AtomicInteger pos = new AtomicInteger(1);

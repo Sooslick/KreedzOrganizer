@@ -36,7 +36,6 @@ public class BhopPlayer {
         savedCollidable = p.isCollidable();
 
         player.setCollidable(false);
-        player.getActivePotionEffects().clear();
     }
 
     public void restart(BhopLevel bl) {

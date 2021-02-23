@@ -185,10 +185,12 @@ public class BhopAdmin {
             setTriggerType(TriggerType.INTERACT);
         level.setChanged();
         //save level
-        BhopLevel old = Engine.getInstance().getBhopLevel(level.getName());
+        Engine engine = Engine.getInstance();
+        BhopLevel old = engine.getBhopLevel(level.getName());
         if (old != null)
-            Engine.getInstance().getBhopLevelList().remove(old);
-        Engine.getInstance().getBhopLevelList().add(level);
+            engine.getBhopLevelList().remove(old);
+        engine.getBhopLevelList().add(level);
+        engine.saveLevel(level);
         admin.sendMessage("§aSaved level " + level.getName());
         return true;
     }

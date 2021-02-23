@@ -1,14 +1,14 @@
-MINECRAFT PARCOUR ORGANIZER
+MINECRAFT PARKOUR ORGANIZER
 =
 
-The plugin for Spigot-based minecraft servers for configuring parcour levels or racetracks
+The plugin for Spigot-based minecraft servers for configuring parkour levels or racetracks
 
 Features
 -
 - Setting up start and finish points and creating checkpoints
 - Simple stopwatch
 - Disabling damage and hunger on level
-- Disabling players' collision and visiblity on level
+- Disabling players' collision and visibility on level
 - Removing inventory while playing and restoring it after exiting
 
 Setup:

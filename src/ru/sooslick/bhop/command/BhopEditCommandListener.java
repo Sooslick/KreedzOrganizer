@@ -260,6 +260,7 @@ public class BhopEditCommandListener implements CommandExecutor {
                     sender.sendMessage("§eSave §f- save edited level");
                     sender.sendMessage("§eDiscard §f- discard any changes");
                     sender.sendMessage("§eReset §f- clear leaderboards for level");
+                    sender.sendMessage("§eReload §f- discard changes and reload levels from disc");
                     return true;
                 }
                 switch (args[1]) {

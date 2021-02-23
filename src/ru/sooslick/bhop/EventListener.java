@@ -2,6 +2,7 @@ package ru.sooslick.bhop;
 
 import org.bukkit.Location;
 import org.bukkit.block.Block;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -9,17 +10,21 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.AreaEffectCloudApplyEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
+import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.server.TabCompleteEvent;
+import org.bukkit.inventory.InventoryHolder;
 import ru.sooslick.bhop.command.BhopCommandListener;
 import ru.sooslick.bhop.command.BhopEditCommandListener;
 import ru.sooslick.bhop.util.BhopUtil;
@@ -38,36 +43,47 @@ public class EventListener implements Listener {
 
     @EventHandler
     public void onInteract(PlayerInteractEvent e) {
+        BhopPlayer bhpl = engine.getBhopPlayer(e.getPlayer());
         if (e.getAction() == Action.RIGHT_CLICK_BLOCK || e.getAction() == Action.LEFT_CLICK_BLOCK)
-            checkTrigger(e.getPlayer(), e.getClickedBlock(), TriggerType.INTERACT);
+            checkTrigger(bhpl, e.getClickedBlock(), TriggerType.INTERACT);
+
+        //prevent opening chests
+        if (bhpl != null
+                && e.getAction() == Action.RIGHT_CLICK_BLOCK
+                && e.getClickedBlock() != null
+                && e.getClickedBlock().getState() instanceof InventoryHolder)
+            e.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onInteractEntity(PlayerInteractEntityEvent e) {
+        //prevent interacting with entities
+        if (engine.getBhopPlayer(e.getPlayer()) != null)
+            e.setCancelled(true);
     }
 
     @EventHandler
     public void onMove(PlayerMoveEvent e) {
         if (e.getTo() == null)
             return;
-        checkTrigger(e.getPlayer(), e.getTo().getBlock(), TriggerType.MOVEMENT);
+        checkTrigger(engine.getBhopPlayer(e.getPlayer()), e.getTo().getBlock(), TriggerType.MOVEMENT);
     }
 
     @EventHandler
     public void onTeleport(PlayerTeleportEvent e) {
         if (e.isCancelled())
             return;
-        if (engine.getActivePlayersCount() == 0)
-            return;
         if (engine.getBhopPlayer(e.getPlayer()) == null)
             return;
         PlayerTeleportEvent.TeleportCause tc = e.getCause();
         if (tc == PlayerTeleportEvent.TeleportCause.CHORUS_FRUIT ||
-            tc == PlayerTeleportEvent.TeleportCause.ENDER_PEARL)
-        e.setCancelled(true);
+                tc == PlayerTeleportEvent.TeleportCause.ENDER_PEARL)
+            e.setCancelled(true);
     }
 
     @EventHandler
     public void onDamage(EntityDamageEvent e) {
         if (e.isCancelled())
-            return;
-        if (engine.getActivePlayersCount() == 0)
             return;
         if (!(e.getEntity() instanceof Player))
             return;
@@ -77,10 +93,38 @@ public class EventListener implements Listener {
     }
 
     @EventHandler
-    public void onHunger(FoodLevelChangeEvent e) {
+    public void onSplash(PotionSplashEvent e) {
         if (e.isCancelled())
             return;
+        Engine engine = Engine.getInstance();
         if (engine.getActivePlayersCount() == 0)
+            return;
+        for (LivingEntity le : e.getAffectedEntities()) {
+            if (le instanceof Player && engine.getBhopPlayer((Player) le) != null) {
+                e.setCancelled(true);
+                return;
+            }
+        }
+    }
+
+    @EventHandler
+    public void onDust(AreaEffectCloudApplyEvent e) {
+        if (e.isCancelled())
+            return;
+        Engine engine = Engine.getInstance();
+        if (engine.getActivePlayersCount() == 0)
+            return;
+        for (LivingEntity le : e.getAffectedEntities()) {
+            if (le instanceof Player && engine.getBhopPlayer((Player) le) != null) {
+                e.setCancelled(true);
+                return;
+            }
+        }
+    }
+
+    @EventHandler
+    public void onHunger(FoodLevelChangeEvent e) {
+        if (e.isCancelled())
             return;
         if (!(e.getEntity() instanceof Player))
             return;
@@ -92,9 +136,6 @@ public class EventListener implements Listener {
 
     @EventHandler
     public void onDisconnect(PlayerQuitEvent e) {
-        if (engine.getActivePlayersCount() == 0)
-            return;
-
         BhopPlayer bhpl = engine.getBhopPlayer(e.getPlayer());
         if (bhpl == null)
             return;
@@ -197,10 +238,7 @@ public class EventListener implements Listener {
             e.blockList().clear();
     }
 
-    private void checkTrigger(Player p, Block b, TriggerType type) {
-        if (engine.getActivePlayersCount() == 0)
-            return;
-        BhopPlayer bhpl = engine.getBhopPlayer(p);
+    private void checkTrigger(BhopPlayer bhpl, Block b, TriggerType type) {
         if (bhpl == null)
             return;
 

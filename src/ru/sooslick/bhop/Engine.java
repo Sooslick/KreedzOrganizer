@@ -135,6 +135,7 @@ public class Engine extends JavaPlugin {
             activePlayers.add(activeBhpl);
         }
         p.teleport(bhl.getStartPosition());
+        p.getActivePotionEffects().forEach(pe -> p.removePotionEffect(pe.getType()));
 
         //check gamemode
         if (p.getGameMode() == GameMode.SPECTATOR)
@@ -173,6 +174,7 @@ public class Engine extends JavaPlugin {
         dcPlayers.remove(bhpl);
         activePlayers.add(bhpl);
         p.teleport(bhpl.getDcLocation());
+        p.getActivePotionEffects().forEach(pe -> p.removePotionEffect(pe.getType()));
         //check gamemode
         if (p.getGameMode() == GameMode.SPECTATOR)
             p.setGameMode(GameMode.ADVENTURE);
@@ -246,6 +248,7 @@ public class Engine extends JavaPlugin {
     }
 
     public BhopPlayer getBhopPlayer(Player p) {
+        if (getActivePlayersCount() == 0) return null;
         return activePlayers.stream().filter(bhpl -> bhpl.getPlayer().equals(p)).findFirst().orElse(null);
     }
 
@@ -384,6 +387,9 @@ public class Engine extends JavaPlugin {
             }
         }
         LOG.info("Loaded " + levels.size() + " Bhop levels");
+        int files = new File(LEVELS_DIR).listFiles().length;
+        if (files > levels.size())
+            LOG.warning("Level folder contains more files than actual level count. Did you configure levels properly?");
 
         //load bhop admin
         BhopAdminManager.init();
@@ -458,7 +464,7 @@ public class Engine extends JavaPlugin {
         }
     }
 
-    private void saveLevel(BhopLevel level) {
+    public void saveLevel(BhopLevel level) {
         if (!level.isChanged())
             return;
         LOG.info("Saving changes in level " + level.getName());
