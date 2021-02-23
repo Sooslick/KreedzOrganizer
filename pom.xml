@@ -6,6 +6,7 @@
 
     <groupId>ru.sooslick.bhop</groupId>
     <artifactId>KreedzOrganizer</artifactId>
+    <version>0.3.3</version>
 
     <repositories>
         <repository>

@@ -191,6 +191,7 @@ public class BhopAdmin {
             engine.getBhopLevelList().remove(old);
         engine.getBhopLevelList().add(level);
         engine.saveLevel(level);
+        engine.saveCfgOnlyLevels();
         admin.sendMessage("§aSaved level " + level.getName());
         return true;
     }

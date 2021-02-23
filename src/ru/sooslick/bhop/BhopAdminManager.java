@@ -53,7 +53,9 @@ public class BhopAdminManager {
             return;
         }
         if (confirm) {
-            Engine.getInstance().deleteLevel(bhl);
+            Engine engine = Engine.getInstance();
+            engine.deleteLevel(bhl);
+            engine.saveCfgOnlyLevels();
             sender.sendMessage("§eDeleted level " + bhl.getName());
         } else
             sender.sendMessage("§cYou cannot undo this operation. Type §e/bhopmanage delete " + bhl.getName() + " sure §cfor confirmation");
@@ -166,6 +168,7 @@ public class BhopAdminManager {
         }
         if (confirm) {
             level.getRecords().clear();
+            Engine.getInstance().saveLeaderboards();
             sender.sendMessage("§eCleared level's leaderboard");
         } else
             sender.sendMessage("§cYou cannot undo this operation. Type §e/bhopmanage reset " + level.getName() + " sure §cfor confirmation");

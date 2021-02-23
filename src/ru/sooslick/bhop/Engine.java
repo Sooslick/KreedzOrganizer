@@ -224,10 +224,12 @@ public class Engine extends JavaPlugin {
                 rec = new BhopRecord(bhpl.getPlayer().getName(), bhpl.getTimer());
                 bhpl.getLevel().addRecord(rec);
                 bhpl.getPlayer().sendMessage("§aNew personal best");
+                saveLeaderboards();
             } else {
                 if (bhpl.getTimer() < rec.getTime()) {
                     rec.setTime(bhpl.getTimer());
                     bhpl.getPlayer().sendMessage("§aNew personal best");
+                    saveLeaderboards();
                 }
             }
             BhopRecord wrec = bhpl.getLevel().getLevelRecord();
@@ -446,6 +448,20 @@ public class Engine extends JavaPlugin {
         saveCfg();
     }
 
+    public void saveCfgOnlyLevels() {
+        reloadConfig();
+        FileConfiguration cfg = getConfig();
+        List<String> levelNames = new LinkedList<>();
+        levels.forEach(level -> levelNames.add(level.getName()));
+        cfg.set(CFG_LEVELS, levelNames);
+        try {
+            cfg.save(DATA_FOLDER_PATH + CFG_FILENAME);
+            LOG.info("Saved config");
+        } catch (IOException e) {
+            LOG.warning("Unable to save config");
+        }
+    }
+
     private void saveCfg() {
         if (!cfgChanged) {
             LOG.info("No changes in main config");
@@ -499,7 +515,7 @@ public class Engine extends JavaPlugin {
         }
     }
 
-    private void saveLeaderboards() {
+    public void saveLeaderboards() {
         YamlConfiguration csLeaders = new YamlConfiguration();
         for (BhopLevel bhl : levels) {
             ConfigurationSection csLevel = new YamlConfiguration();
