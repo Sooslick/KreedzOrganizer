@@ -24,6 +24,5 @@ Permissions
 - `bhop.bypass` - permission to build on existing levels
 - `bhop.reload` - access to */bhopmanage reload* command for reloading config and levels
 
-Demo
+[Demo](https://www.youtube.com/watch?v=gpLOydqQB24)
 -
-*missing youtube link*
