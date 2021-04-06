@@ -1,5 +1,6 @@
 package ru.sooslick.bhop;
 
+import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -76,6 +77,7 @@ public class Engine extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        new Metrics(this, 10944);
         instance = this;
         DATA_FOLDER_PATH = getDataFolder().getPath() + File.separator;
         LEVELS_DIR = DATA_FOLDER_PATH + CFG_LEVELS;

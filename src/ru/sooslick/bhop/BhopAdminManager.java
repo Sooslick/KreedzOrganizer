@@ -32,7 +32,7 @@ public class BhopAdminManager {
             //no session found, just create level
             admin = new BhopAdmin(sender, new BhopLevel(levelName), true);
             activeAdmins.add(admin);
-            sender.sendMessage("§eCreated level §6" + levelName + " §e and started edit session");
+            sender.sendMessage("§eCreated level §6" + levelName + " §eand started edit session");
             admin.sendStatus();
             return;
         }
