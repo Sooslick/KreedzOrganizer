@@ -341,7 +341,8 @@ public class Engine extends JavaPlugin {
                 //read level's data
                 YamlConfiguration csParams = new YamlConfiguration();
                 csParams.load(LEVELS_PATH + levelName + YAML_EXTENSION);
-                BhopLevel bhopLevel = new BhopLevel(levelName);
+                String author = csParams.getString("author", null);
+                BhopLevel bhopLevel = new BhopLevel(levelName, author);
                 World w = Bukkit.getWorld(csParams.getString("world"));
                 boolean rgSuccess = false;
                 if (useWg && csParams.contains("region")) {
@@ -490,6 +491,7 @@ public class Engine extends JavaPlugin {
         try {
             YamlConfiguration levelCfg = new YamlConfiguration();
             levelCfg.set("world", level.getStartPosition().getWorld().getName());
+            levelCfg.set("author", level.getAuthor());
             if (level.getBhopRegion() instanceof WorldGuardRegion)
                 levelCfg.set("region", ((WorldGuardRegion) level.getBhopRegion()).getName());
             levelCfg.set("bound1", BhopUtil.locationToString(level.getBhopRegion().getBound1()));

@@ -18,6 +18,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class BhopLevel {
 
     private final String name;
+    private final String author;
     private final List<BhopCheckpoint> checkpoints;
     private final List<BhopRecord> records;
     private BhopRegion bounds;
@@ -26,8 +27,9 @@ public class BhopLevel {
     private TriggerType triggerType;
     private boolean edit;
 
-    public BhopLevel(String name) {
+    public BhopLevel(String name, String author) {
         this.name = name;
+        this.author = author;
         checkpoints = new ArrayList<>();
         records = new ArrayList<>();
         edit = false;
@@ -95,6 +97,10 @@ public class BhopLevel {
 
     public String getName() {
         return name;
+    }
+
+    public String getAuthor() {
+        return author;
     }
 
     public void addCheckpoint(BhopCheckpoint bhopCheckpoint) {
@@ -165,7 +171,7 @@ public class BhopLevel {
     @SuppressWarnings("MethodDoesntCallSuperMethod")
     @Override
     public BhopLevel clone() {
-        BhopLevel copy = new BhopLevel(name);
+        BhopLevel copy = new BhopLevel(name, author);
         copy.setBhopRegion(bounds.getCopy());   //weird wg.
         copy.setStart(start.clone());
         copy.setFinish(finish.clone());

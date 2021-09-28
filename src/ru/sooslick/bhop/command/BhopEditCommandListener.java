@@ -60,7 +60,9 @@ public class BhopEditCommandListener implements CommandExecutor {
             return true;
         }
 
-        if (!sender.hasPermission(BhopPermissions.EDIT))
+        boolean any = sender.hasPermission(BhopPermissions.EDIT);
+        boolean own = any || sender.hasPermission(BhopPermissions.EDIT_OWN);
+        if (!any && !own)
             return sendMessageAndReturn(sender, NO_PERMISSION);
 
         switch (args[0].toLowerCase()) {
@@ -79,6 +81,9 @@ public class BhopEditCommandListener implements CommandExecutor {
                 bhl = Engine.getInstance().getBhopLevel(args[1]);
                 if (bhl == null)
                     return sendMessageAndReturn(sender, "§cLevel §6" + args[1] + " §cnot found");
+                if (!any)
+                    if (!sender.getName().equals(bhl.getAuthor()))
+                        return sendMessageAndReturn(sender, NO_PERMISSION);
                 boolean confirm = (args.length > 2 && args[2].equalsIgnoreCase("sure"));
                 BhopAdminManager.deleteLevel(sender, bhl, confirm);
                 return true;
@@ -89,6 +94,9 @@ public class BhopEditCommandListener implements CommandExecutor {
                 bhl = Engine.getInstance().getBhopLevel(args[1]);
                 if (bhl == null)
                     return sendMessageAndReturn(sender, "§cLevel §6" + args[1] + " §cnot found, use §6/bhopmanage create " + args[1] + " §cinstead");
+                if (!any)
+                    if (!sender.getName().equals(bhl.getAuthor()))
+                        return sendMessageAndReturn(sender, NO_PERMISSION);
                 BhopAdminManager.editLevel(sender, bhl);
                 return true;
 
@@ -239,6 +247,8 @@ public class BhopEditCommandListener implements CommandExecutor {
                 return true;
 
             case COMMAND_RESET:
+                if (!any)
+                    return sendMessageAndReturn(sender, NO_PERMISSION);
                 if (args.length == 1)
                     return sendMessageAndReturn(sender, "§c/bhopmanage reset <level name>");
                 bhl = Engine.getInstance().getBhopLevel(args[1]);

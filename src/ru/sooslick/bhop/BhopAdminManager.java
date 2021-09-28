@@ -30,7 +30,7 @@ public class BhopAdminManager {
         BhopAdmin admin = getActiveAdmin(sender);
         if (admin == null) {
             //no session found, just create level
-            admin = new BhopAdmin(sender, new BhopLevel(levelName), true);
+            admin = new BhopAdmin(sender, new BhopLevel(levelName, sender.getName()), true);
             activeAdmins.add(admin);
             sender.sendMessage("§eCreated level §6" + levelName + " §eand started edit session");
             admin.sendStatus();
@@ -53,6 +53,7 @@ public class BhopAdminManager {
             return;
         }
         if (confirm) {
+            pc.deactivate();
             Engine engine = Engine.getInstance();
             engine.deleteLevel(bhl);
             engine.saveCfgOnlyLevels();
@@ -145,6 +146,7 @@ public class BhopAdminManager {
             return;
         }
         if (confirm) {
+            pc.deactivate();
             activeAdmins.remove(admin);
             sender.sendMessage("§eExited editing mode.");
         } else
@@ -154,19 +156,18 @@ public class BhopAdminManager {
     public static void resetScore(CommandSender sender, BhopLevel level, boolean confirm) {
         PendingCommand pc = getPendingCommand(sender);
         if (pc == null) {
-            Engine.LOG.info("Reset score: pending command is null. Create new pending command");
             pendingCommands.add(new PendingCommand(sender, BhopAction.RESET));
             sender.sendMessage("§cYou cannot undo this operation. Type §e/bhopmanage reset " + level.getName() + " sure §cfor confirmation");
             return;
         }
         if (pc.getAction() != BhopAction.RESET) {
-            Engine.LOG.info("Reset score: action of pending command is not delete. Deactivate old and create new pending command");
             pc.deactivate();
             pendingCommands.add(new PendingCommand(sender, BhopAction.RESET));
             sender.sendMessage("§cYou cannot undo this operation. Type §e/bhopmanage reset " + level.getName() + " sure §cfor confirmation");
             return;
         }
         if (confirm) {
+            pc.deactivate();
             level.getRecords().clear();
             Engine.getInstance().saveLeaderboards();
             sender.sendMessage("§eCleared level's leaderboard");

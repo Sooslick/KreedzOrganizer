@@ -1,8 +1,9 @@
 name: BHop
-version: 0.4
+version: 0.5
 description: bhop
 author: sooslick
 main: ru.sooslick.bhop.Engine
+api-version: 1.16
 softdepend:
   - WorldEdit
   - WorldGuard
@@ -24,4 +25,9 @@ permissions:
     description: allows to build ignoring levels restrictions
   bhop.edit:
     default: op
-    description: grants access to editor commands
+    description: grants access to editor commands for all levels
+    children:
+      bhop.edit.own: true
+  bhop.edit.own:
+    default: op
+    description: grants access to editor commands for sender's levels
