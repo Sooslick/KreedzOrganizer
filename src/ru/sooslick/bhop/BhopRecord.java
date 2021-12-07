@@ -1,12 +1,9 @@
 package ru.sooslick.bhop;
 
 import org.jetbrains.annotations.NotNull;
+import ru.sooslick.bhop.util.CommonUtil;
 
 public class BhopRecord implements Comparable<Object> {
-
-    private static final String HTEMPLATE = "%d:%02d:%02d";
-    private static final String MTEMPLATE = "%d:%02d";
-
     private final String playerName;
     private int playerTime;
 
@@ -24,19 +21,7 @@ public class BhopRecord implements Comparable<Object> {
     }
 
     public String formatTime() {
-        int h = playerTime / 3600;
-        if (h > 0) {
-            return String.format(
-                    HTEMPLATE,
-                    playerTime / 3600,
-                    (playerTime % 3600) / 60,
-                    playerTime % 60);
-        } else {
-            return String.format(
-                    MTEMPLATE,
-                    (playerTime % 3600) / 60,
-                    playerTime % 60);
-        }
+        return CommonUtil.formatDuration(playerTime);
     }
 
     public void setTime(int newTime) {

@@ -19,6 +19,7 @@ import ru.sooslick.bhop.command.BhopEditCommandListener;
 import ru.sooslick.bhop.exception.WorldGuardException;
 import ru.sooslick.bhop.region.WorldGuardRegion;
 import ru.sooslick.bhop.util.BhopUtil;
+import ru.sooslick.bhop.util.CommonUtil;
 import ru.sooslick.bhop.util.InventoryUtil;
 
 import java.io.BufferedReader;
@@ -219,7 +220,7 @@ public class Engine extends JavaPlugin {
         LOG.info("Bhop player finish event triggered");
         if (bhpl == null)
             return;
-        bhpl.getPlayer().sendMessage("§aLevel finished in " + bhpl.getTimer());
+        bhpl.getPlayer().sendMessage("§aLevel finished in " + CommonUtil.formatDuration(bhpl.getTimer()));
         if (!bhpl.isCheated()) {
             BhopRecord rec = bhpl.getLevel().getPlayerRecord(bhpl.getPlayer().getName());
             if (rec == null) {
@@ -236,7 +237,7 @@ public class Engine extends JavaPlugin {
             }
             BhopRecord wrec = bhpl.getLevel().getLevelRecord();
             if (wrec == rec && wrec.getTime() == bhpl.getTimer())
-                Bukkit.broadcastMessage("§eNew record on " + bhpl.getLevel().getName() + ": " + rec.getTime() + " by " + rec.getName());
+                Bukkit.broadcastMessage("§eNew record on " + bhpl.getLevel().getName() + ": " + rec.formatTime() + " by " + rec.getName());
         }
         playerExitEvent(bhpl);
     }

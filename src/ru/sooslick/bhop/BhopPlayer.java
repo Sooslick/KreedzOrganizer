@@ -60,7 +60,9 @@ public class BhopPlayer {
         player = p;
     }
 
-    public BhopLevel getLevel() { return level; }
+    public BhopLevel getLevel() {
+        return level;
+    }
 
     public BhopCheckpoint getCheckpoint(String name) {
         return checkpoints.stream().filter(cp -> cp.getName().equals(name)).findFirst().orElse(null);
@@ -106,21 +108,19 @@ public class BhopPlayer {
 
     public boolean tickAndCheckFlee() {
         timer++;
-        if (timer % 11 == 1)
+        if (timer % 225 == 1)
             player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 228, 1));
         if (level.isInside(player.getLocation())) {
-            if (fleeTimer > 0) {
-                if (fleeTimer > 5)
-                    player.sendMessage("§eWelcome back");
-                fleeTimer = 0;
-            }
+            if (fleeTimer > 100)
+                player.sendMessage("§eWelcome back");
+            fleeTimer = 0;
         } else {
             if (fleeTimer++ == 1) {
                 player.sendMessage("§cYou are outside of level. Let's come back!");
             }
-            if (fleeTimer % 5 == 0) {
-                player.sendMessage("§c" + (15 - fleeTimer) + " seconds to exit");
-                return fleeTimer >= 15;
+            if (fleeTimer % 100 == 0) {
+                player.sendMessage("§c" + (15 - fleeTimer / 20) + " seconds to exit");
+                return fleeTimer >= 300;
             }
         }
         return false;
