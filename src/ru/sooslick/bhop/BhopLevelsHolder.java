@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 public class BhopLevelsHolder {
 
-    private static List<BhopLevel> levels = new LinkedList<>();
+    private static final List<BhopLevel> levels = new LinkedList<>();
 
     public static BhopLevel getBhopLevel(String name) {
         return levels.stream()

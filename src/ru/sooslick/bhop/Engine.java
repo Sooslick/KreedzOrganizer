@@ -33,7 +33,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 public class Engine extends JavaPlugin {
 
@@ -64,12 +63,9 @@ public class Engine extends JavaPlugin {
     private boolean useWg = false;
     private boolean cfgChanged = false;
 
-    private final Runnable bhopTimerProcessor = () -> {
-        List<BhopPlayer> fleePlayers = activePlayers.stream()
-                .filter(BhopPlayer::tickAndCheckFlee)
-                .collect(Collectors.toList());
-        fleePlayers.forEach(this::playerExitEvent);
-    };
+    private final Runnable bhopTimerProcessor = () -> activePlayers.stream()
+           .filter(BhopPlayer::tickAndCheckFlee)
+           .forEach(this::playerExitEvent);
 
     public static Engine getInstance() {
         return instance;
@@ -124,6 +120,7 @@ public class Engine extends JavaPlugin {
         p.getActivePotionEffects().forEach(pe -> p.removePotionEffect(pe.getType()));
 
         //check gamemode
+        // todo weird behavior, change plz
         if (p.getGameMode() == GameMode.SPECTATOR)
             p.setGameMode(GameMode.ADVENTURE);
         else if (p.getGameMode() != GameMode.SURVIVAL && p.getGameMode() != GameMode.ADVENTURE)
@@ -131,7 +128,7 @@ public class Engine extends JavaPlugin {
 
         //launch timer if not exists
         if (bhopTimerId == 0) {
-            bhopTimerId = Bukkit.getScheduler().scheduleSyncRepeatingTask(this, bhopTimerProcessor, 1, 20);
+            bhopTimerId = Bukkit.getScheduler().scheduleSyncRepeatingTask(this, bhopTimerProcessor, 1, 1);
         }
 
         //return player
@@ -168,7 +165,7 @@ public class Engine extends JavaPlugin {
             bhpl.enableCheats();
         //launch timer if not exists
         if (bhopTimerId == 0) {
-            bhopTimerId = Bukkit.getScheduler().scheduleSyncRepeatingTask(this, bhopTimerProcessor, 1, 20);
+            bhopTimerId = Bukkit.getScheduler().scheduleSyncRepeatingTask(this, bhopTimerProcessor, 1, 1);
         }
     }
 
@@ -293,7 +290,7 @@ public class Engine extends JavaPlugin {
                         }
 //                        BufferedReader br = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream(CFG_DEFAULT_LEVEL)));
                         BufferedReader br = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream("/defaultLevel.yml")));
-                        PrintWriter pw = new PrintWriter(new File(LEVELS_PATH + CFG_DEFAULT_LEVEL));
+                        PrintWriter pw = new PrintWriter(LEVELS_PATH + CFG_DEFAULT_LEVEL);
                         String s;
                         while ((s = br.readLine()) != null) {
                             pw.println(s);

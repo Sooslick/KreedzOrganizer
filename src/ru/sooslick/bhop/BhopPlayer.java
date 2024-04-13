@@ -101,11 +101,11 @@ public class BhopPlayer {
         player.sendMessage("§cBhop cheats enabled");
     }
 
-    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean isCheated() {
         return cheats;
     }
 
+    // todo I should move timeouts to config
     public boolean tickAndCheckFlee() {
         timer++;
         if (timer % 225 == 1)
