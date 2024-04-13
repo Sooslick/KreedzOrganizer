@@ -186,11 +186,8 @@ public class BhopAdmin {
         level.setChanged();
         //save level
         Engine engine = Engine.getInstance();
-        BhopLevel old = engine.getBhopLevel(level.getName());
-        if (old != null)
-            engine.getBhopLevelList().remove(old);
-        engine.getBhopLevelList().add(level);
-        engine.saveLevel(level);
+        BhopLevelsHolder.updateLevel(level);
+        engine.writeLevel(level);
         engine.saveCfgOnlyLevels();
         admin.sendMessage("§aSaved level " + level.getName());
         return true;

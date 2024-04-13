@@ -171,10 +171,11 @@ public class EventListener implements Listener {
         if (e.getPlayer().hasPermission(BhopPermissions.BYPASS))
             return;
         //check is block inside any level
-        for (BhopLevel level : engine.getBhopLevelList()) {
+        // todo getLevelList create copy of list every time so i must cache regions probably
+        for (BhopLevel level : BhopLevelsHolder.getBhopLevelList()) {
             if (level.isInside(e.getBlock().getLocation())) {
                 e.setCancelled(true);
-                e.getPlayer().sendMessage("Don't build here");
+                e.getPlayer().sendMessage("You can't build in parkour area");
                 return;
             }
         }
@@ -187,10 +188,11 @@ public class EventListener implements Listener {
         if (e.getPlayer().hasPermission(BhopPermissions.BYPASS))
             return;
         //check is block inside any level
-        for (BhopLevel level : engine.getBhopLevelList()) {
+        // todo getLevelList create copy of list every time so i must cache regions probably
+        for (BhopLevel level : BhopLevelsHolder.getBhopLevelList()) {
             if (level.isInside(e.getBlock().getLocation())) {
                 e.setCancelled(true);
-                e.getPlayer().sendMessage("Don't build here");
+                e.getPlayer().sendMessage("You can't build in parkour area");
                 return;
             }
         }
@@ -223,7 +225,7 @@ public class EventListener implements Listener {
         if (e.isCancelled())
             return;
         double r = calcExplosionRadius(e.getLocation(), e.blockList());
-        double d = engine.distanceToNearestLevel(e.getLocation());
+        double d = BhopLevelsHolder.calcDistanceToNearestLevel(e.getLocation());
         if (d < r)
             e.blockList().clear();
     }
@@ -233,7 +235,7 @@ public class EventListener implements Listener {
         if (e.isCancelled())
             return;
         double r = calcExplosionRadius(e.getBlock().getLocation(), e.blockList());
-        double d = engine.distanceToNearestLevel(e.getBlock().getLocation());
+        double d = BhopLevelsHolder.calcDistanceToNearestLevel(e.getBlock().getLocation());
         if (d < r)
             e.blockList().clear();
     }

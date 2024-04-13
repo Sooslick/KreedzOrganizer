@@ -58,7 +58,6 @@ public class Engine extends JavaPlugin {
     public static String INVENTORY_PATH;
     public static String INVENTORY_BACKUP_PATH;
 
-    private List<BhopLevel> levels;
     private List<BhopPlayer> activePlayers;
     private List<BhopPlayer> dcPlayers;
     private int bhopTimerId = 0;
@@ -95,22 +94,6 @@ public class Engine extends JavaPlugin {
 
     public boolean isUseWg() {
         return useWg;
-    }
-
-    public BhopLevel getBhopLevel(String name) {
-        return levels.stream().filter(level -> level.getName().equals(name)).findFirst().orElse(null);
-    }
-
-    public String getBhopLevels() {
-        return levels.stream().map(BhopLevel::getName).collect(Collectors.joining(", "));
-    }
-
-    public List<BhopLevel> getBhopLevelList() {
-        return levels;
-    }
-
-    public double distanceToNearestLevel(Location l) {
-        return levels.stream().map(level -> level.distanceToLevel(l)).min(Double::compareTo).orElse(BhopUtil.MAXD);
     }
 
     public BhopCheckpoint getBhopPlayerCheckpoint(@NotNull BhopPlayer bhpl, String cpName) {
@@ -268,11 +251,13 @@ public class Engine extends JavaPlugin {
 
     public void printPlayerStat(CommandSender sender, String name) {
         AtomicInteger entries = new AtomicInteger();
-        levels.forEach(bhl -> bhl.getRecords().stream().filter(bhr -> bhr.getName().equals(name))
-                .forEach(bhr -> {
-                    sender.sendMessage("§e" + bhl.getName() + ": " + bhr.formatTime());
-                    entries.getAndIncrement();
-                }));
+        BhopLevelsHolder.getBhopLevelList()
+                .forEach(bhl -> bhl.getRecords().stream()
+                        .filter(bhr -> bhr.getName().equals(name))
+                        .forEach(bhr -> {
+                            sender.sendMessage("§e" + bhl.getName() + ": " + bhr.formatTime());
+                            entries.getAndIncrement();
+                        }));
         if (entries.get() == 0)
             sender.sendMessage("§cNo stats found for player " + name);
     }
@@ -331,10 +316,9 @@ public class Engine extends JavaPlugin {
         useWg = cfg.getBoolean(CFG_USEWG, false);
         List<?> csLevels = cfg.getList(CFG_LEVELS);
         if (csLevels == null) csLevels = Collections.emptyList();
-        levels = new ArrayList<>();
         for (Object obj : csLevels) {
             String levelName = (String) obj;
-            if (getBhopLevel(levelName) != null) {
+            if (BhopLevelsHolder.getBhopLevel(levelName) != null) {
                 LOG.warning("Level " + levelName + " duplication in config.yml, skipping");
                 continue;
             }
@@ -386,15 +370,16 @@ public class Engine extends JavaPlugin {
                 }
 
                 //save level
-                levels.add(bhopLevel);
+                BhopLevelsHolder.updateLevel(bhopLevel);
             } catch (Exception e) {
                 LOG.warning("Error occurred while reading level " + levelName);
                 LOG.warning(e.getMessage());
             }
         }
-        LOG.info("Loaded " + levels.size() + " Bhop levels");
+        int levelsSize = BhopLevelsHolder.getLevelsNumber();
+        LOG.info("Loaded " + levelsSize + " Bhop levels");
         int files = new File(LEVELS_DIR).listFiles().length;
-        if (files > levels.size())
+        if (files > levelsSize)
             LOG.warning("Level folder contains more files than actual level count. Did you configure levels properly?");
 
         //load bhop admin
@@ -406,7 +391,7 @@ public class Engine extends JavaPlugin {
         if (f.exists()) {
             try {
                 csRecords.load(DATA_FOLDER_PATH + CFG_LEADERBOARDS);
-                for (BhopLevel bhl : levels) {
+                for (BhopLevel bhl : BhopLevelsHolder.getBhopLevelList()) {
                     ConfigurationSection csLevelRecs = csRecords.getConfigurationSection(bhl.getName());
                     for (String name : csLevelRecs.getKeys(false)) {
                         bhl.addRecord(new BhopRecord(name, csLevelRecs.getInt(name)));
@@ -448,16 +433,14 @@ public class Engine extends JavaPlugin {
 
     private void saveAll() {
         saveLeaderboards();
-        levels.forEach(this::saveLevel);
+        BhopLevelsHolder.getBhopLevelList().forEach(this::writeLevel);
         saveCfg();
     }
 
     public void saveCfgOnlyLevels() {
         reloadConfig();
         FileConfiguration cfg = getConfig();
-        List<String> levelNames = new LinkedList<>();
-        levels.forEach(level -> levelNames.add(level.getName()));
-        cfg.set(CFG_LEVELS, levelNames);
+        cfg.set(CFG_LEVELS, BhopLevelsHolder.getBhopLevelNamesList());
         try {
             cfg.save(DATA_FOLDER_PATH + CFG_FILENAME);
             LOG.info("Saved config");
@@ -471,12 +454,10 @@ public class Engine extends JavaPlugin {
             LOG.info("No changes in main config");
             return;
         }
-        List<String> levelNames = new LinkedList<>();
-        levels.forEach(level -> levelNames.add(level.getName()));
         try {
             FileConfiguration mainCfg = new YamlConfiguration();
             mainCfg.set(CFG_USEWG, useWg);
-            mainCfg.set(CFG_LEVELS, levelNames);
+            mainCfg.set(CFG_LEVELS, BhopLevelsHolder.getBhopLevelNamesList());
             mainCfg.save(DATA_FOLDER_PATH + CFG_FILENAME);
             LOG.info("Saved config");
         } catch (Exception e) {
@@ -484,7 +465,7 @@ public class Engine extends JavaPlugin {
         }
     }
 
-    public void saveLevel(BhopLevel level) {
+    public void writeLevel(BhopLevel level) {
         if (!level.isChanged())
             return;
         LOG.info("Saving changes in level " + level.getName());
@@ -522,7 +503,7 @@ public class Engine extends JavaPlugin {
 
     public void saveLeaderboards() {
         YamlConfiguration csLeaders = new YamlConfiguration();
-        for (BhopLevel bhl : levels) {
+        for (BhopLevel bhl : BhopLevelsHolder.getBhopLevelList()) {
             ConfigurationSection csLevel = new YamlConfiguration();
             for (BhopRecord rec : bhl.getRecords()) {
                 csLevel.set(rec.getName(), rec.getTime());
@@ -540,12 +521,12 @@ public class Engine extends JavaPlugin {
     // ADMIN METHODS
 
     public void deleteLevel(BhopLevel bhl) {
-        if (levels.remove(bhl)) {
+        if (BhopLevelsHolder.removeLevel(bhl)) {
             cfgChanged = true;
             if (bhl.getFile().delete())
                 LOG.info("Removed level " + bhl.getName());
             else
-                LOG.info("Level " + bhl.getName() + " removed, but file was not deleted");
+                LOG.warning("Level " + bhl.getName() + " removed, but file was not deleted");
         }
     }
 
@@ -561,4 +542,11 @@ public class Engine extends JavaPlugin {
     //  test level
     //  code refactoring
     //  new timer: realtime / ticks + scoreboard
+    //  triggerzones
+    //  race mode
+    //  vault economy enable
+    //  paid entry
+    //  win reward
+    //  jumpto
+    //  gui inventories
 }

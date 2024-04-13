@@ -10,6 +10,7 @@ import org.bukkit.event.server.TabCompleteEvent;
 import org.jetbrains.annotations.NotNull;
 import ru.sooslick.bhop.BhopCheckpoint;
 import ru.sooslick.bhop.BhopLevel;
+import ru.sooslick.bhop.BhopLevelsHolder;
 import ru.sooslick.bhop.BhopPermissions;
 import ru.sooslick.bhop.BhopPlayer;
 import ru.sooslick.bhop.Engine;
@@ -56,13 +57,13 @@ public class BhopCommandListener implements CommandExecutor {
         if (args.length > 0) {
             switch (args[0].toLowerCase()) {
                 case COMMAND_LEVELS:
-                    return sendMessageAndReturn(sender, engine.getBhopLevels());
+                    return sendMessageAndReturn(sender, BhopLevelsHolder.getBhopLevelNames());
                 case COMMAND_CHECKPOINTS:
                     //format checkpoints list if level specified
                     if (args.length > 1) {
-                        BhopLevel bhl = engine.getBhopLevel(args[1]);
+                        BhopLevel bhl = BhopLevelsHolder.getBhopLevel(args[1]);
                         if (bhl == null)
-                            return sendMessageAndReturn(sender, AVAILABLE_LEVELS + engine.getBhopLevels());
+                            return sendMessageAndReturn(sender, AVAILABLE_LEVELS + BhopLevelsHolder.getBhopLevelNames());
                         else
                             return sendMessageAndReturn(sender, bhl.getCheckpoints().stream().map(BhopCheckpoint::getName).collect(Collectors.joining(", ")));
                     }
@@ -78,9 +79,9 @@ public class BhopCommandListener implements CommandExecutor {
                 case COMMAND_LEADERBOARDS:
                     if (args.length == 1)
                         return sendMessageAndReturn(sender, "§c/bhop leaderboards <level name>");
-                    BhopLevel bhl = engine.getBhopLevel(args[1]);
+                    BhopLevel bhl = BhopLevelsHolder.getBhopLevel(args[1]);
                     if (bhl == null)
-                        return sendMessageAndReturn(sender, AVAILABLE_LEVELS + engine.getBhopLevels());
+                        return sendMessageAndReturn(sender, AVAILABLE_LEVELS + BhopLevelsHolder.getBhopLevelNames());
                     bhl.printLeaderboard(sender);
                     return true;
 
@@ -123,13 +124,13 @@ public class BhopCommandListener implements CommandExecutor {
                 if (args.length == 1) {
                     sender.sendMessage(LEVEL_REQUIRED);
                     sender.sendMessage(AVAILABLE_LEVELS);
-                    return sendMessageAndReturn(sender, engine.getBhopLevels());
+                    return sendMessageAndReturn(sender, BhopLevelsHolder.getBhopLevelNames());
                 }
-                BhopLevel bhl = engine.getBhopLevel(args[1]);
+                BhopLevel bhl = BhopLevelsHolder.getBhopLevel(args[1]);
                 if (bhl == null) {
                     sender.sendMessage(LEVEL_NOT_FOUND);
                     sender.sendMessage(AVAILABLE_LEVELS);
-                    return sendMessageAndReturn(sender, engine.getBhopLevels());
+                    return sendMessageAndReturn(sender, BhopLevelsHolder.getBhopLevelNames());
                 }
                 //trigger start event
                 BhopPlayer bhpl = engine.playerStartEvent(player, bhl);
@@ -214,7 +215,7 @@ public class BhopCommandListener implements CommandExecutor {
                 case COMMAND_PRACTICE:
                 case COMMAND_CHECKPOINTS:
                 case COMMAND_LEADERBOARDS:
-                    e.setCompletions(engine.getBhopLevelList().stream().map(BhopLevel::getName).collect(Collectors.toList()));
+                    e.setCompletions(BhopLevelsHolder.getBhopLevelNamesList());
                     return;
                 case COMMAND_LOAD:
                     if (e.getSender() instanceof Player) {

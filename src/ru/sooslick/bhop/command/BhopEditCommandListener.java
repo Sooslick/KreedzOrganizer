@@ -13,6 +13,7 @@ import ru.sooslick.bhop.BhopAdmin;
 import ru.sooslick.bhop.BhopAdminManager;
 import ru.sooslick.bhop.BhopCheckpoint;
 import ru.sooslick.bhop.BhopLevel;
+import ru.sooslick.bhop.BhopLevelsHolder;
 import ru.sooslick.bhop.BhopPermissions;
 import ru.sooslick.bhop.Engine;
 import ru.sooslick.bhop.TriggerType;
@@ -69,7 +70,7 @@ public class BhopEditCommandListener implements CommandExecutor {
             case COMMAND_CREATE:
                 if (args.length == 1)
                     return sendMessageAndReturn(sender, "§c/bhopmanage create <level name>");
-                BhopLevel bhl = Engine.getInstance().getBhopLevel(args[1]);
+                BhopLevel bhl = BhopLevelsHolder.getBhopLevel(args[1]);
                 if (bhl != null)
                     return sendMessageAndReturn(sender, "§cLevel " + args[1] + " exists, use §6/bhopmanage edit " + args[1] + " §cinstead");
                 BhopAdminManager.createLevel(sender, args[1]);
@@ -78,7 +79,7 @@ public class BhopEditCommandListener implements CommandExecutor {
             case COMMAND_DELETE:
                 if (args.length == 1)
                     return sendMessageAndReturn(sender, "§c/bhopmanage delete <level name>");
-                bhl = Engine.getInstance().getBhopLevel(args[1]);
+                bhl = BhopLevelsHolder.getBhopLevel(args[1]);
                 if (bhl == null)
                     return sendMessageAndReturn(sender, "§cLevel §6" + args[1] + " §cnot found");
                 if (!any)
@@ -91,7 +92,7 @@ public class BhopEditCommandListener implements CommandExecutor {
             case COMMAND_EDIT:
                 if (args.length == 1)
                     return sendMessageAndReturn(sender, "§c/bhopmanage edit <level name>");
-                bhl = Engine.getInstance().getBhopLevel(args[1]);
+                bhl = BhopLevelsHolder.getBhopLevel(args[1]);
                 if (bhl == null)
                     return sendMessageAndReturn(sender, "§cLevel §6" + args[1] + " §cnot found, use §6/bhopmanage create " + args[1] + " §cinstead");
                 if (!any)
@@ -251,7 +252,7 @@ public class BhopEditCommandListener implements CommandExecutor {
                     return sendMessageAndReturn(sender, NO_PERMISSION);
                 if (args.length == 1)
                     return sendMessageAndReturn(sender, "§c/bhopmanage reset <level name>");
-                bhl = Engine.getInstance().getBhopLevel(args[1]);
+                bhl = BhopLevelsHolder.getBhopLevel(args[1]);
                 if (bhl == null)
                     return sendMessageAndReturn(sender, "§cLevel §6" + args[1] + " §cnot found.");
                 confirm = (args.length > 2 && args[2].equals(CONFIRMATION));
@@ -358,7 +359,7 @@ public class BhopEditCommandListener implements CommandExecutor {
                 case COMMAND_EDIT:
                 case COMMAND_DELETE:
                 case COMMAND_RESET:
-                    e.setCompletions(engine.getBhopLevelList().stream().map(BhopLevel::getName).collect(Collectors.toList()));
+                    e.setCompletions(BhopLevelsHolder.getBhopLevelNamesList());
                     return;
                 case COMMAND_SET:
                     e.setCompletions(Arrays.asList(SET_BOUND1, SET_BOUND2, SET_START, SET_FINISH, SET_REGION, SET_TRIGGER_TYPE));
